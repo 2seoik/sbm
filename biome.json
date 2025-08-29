@@ -17,6 +17,9 @@
   "linter": {
     "enabled": true,
     "rules": {
+      "a11y": {
+        "useButtonType": "off"
+      },
       "recommended": true,
       "nursery": {
         "useSortedClasses": {

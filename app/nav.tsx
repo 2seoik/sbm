@@ -1,14 +1,22 @@
 import { SquareLibrary } from "lucide-react";
 import Link from "next/link";
+import { use } from "react";
+import { auth } from "@/lib/auth";
 
 export default function Nav() {
+  const session = use(auth());
+  const didLogin = !!session?.user;
+
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-5 py-1">
       <Link href="/bookcase" className="btn-icon">
         <SquareLibrary size={28} />
       </Link>
-      <Link href="/my">My</Link>
-      <Link href="/sign">SignIn</Link>
+      {didLogin ? (
+        <Link href="/my">{session.user?.name}</Link>
+      ) : (
+        <Link href="api/auth/signin">Login</Link>
+      )}
     </div>
   );
 }

@@ -2,8 +2,10 @@ import { BookMarkedIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { SessionProvider } from "next-auth/react";
 import ThemeChanger from "@/components/theme-changer";
 import { ThemeProvider } from "@/components/theme-provider";
+import { auth } from "@/lib/auth";
 import "./globals.css";
 import Nav from "./nav";
 
@@ -22,44 +24,47 @@ export const metadata: Metadata = {
   description: "Social BookMark",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="container mx-auto flex h-screen flex-col justify-center border">
-            <header className="flex justify-between border border-b-4 border-b-amber-300">
-              <Link
-                href="/"
-                className="flex items-center font-semibold text-3xl text-blue-800 tracking-tight"
-              >
-                <BookMarkedIcon size={28} />
-                BookMark
-              </Link>
-              <Nav />
-            </header>
-            <main className="flex-1"> {children}</main>
-            <footer>
-              <div className="flex justify-between">
-                <div className="text-green-500">&#169; shlee 2025</div>
-                <div>
-                  <ThemeChanger />
+        <SessionProvider session={session}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="container mx-auto flex h-screen flex-col justify-center border">
+              <header className="flex justify-between border border-b-4 border-b-amber-300">
+                <Link
+                  href="/"
+                  className="flex items-center font-semibold text-3xl text-blue-800 tracking-tight"
+                >
+                  <BookMarkedIcon size={28} />
+                  BookMark
+                </Link>
+                <Nav />
+              </header>
+              <main className="flex-1"> {children}</main>
+              <footer>
+                <div className="flex justify-between">
+                  <div className="text-green-500">&#169; shlee 2025</div>
+                  <div>
+                    <ThemeChanger />
+                  </div>
                 </div>
-              </div>
-            </footer>
-          </div>
-        </ThemeProvider>
+              </footer>
+            </div>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

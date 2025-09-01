@@ -2,6 +2,7 @@ import { BookMarkedIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import ThemeChanger from "@/components/theme-changer";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import Nav from "./nav";
@@ -49,8 +50,13 @@ export default function RootLayout({
               <Nav />
             </header>
             <main className="flex-1"> {children}</main>
-            <footer className="text-center text-green-500">
-              &#169; shlee 20205
+            <footer>
+              <div className="flex justify-between">
+                <div className="text-green-500">&#169; shlee 2025</div>
+                <div>
+                  <ThemeChanger />
+                </div>
+              </div>
             </footer>
           </div>
         </ThemeProvider>

@@ -37,10 +37,12 @@ export const {
   ],
   callbacks: {
     async signIn({ user, profile }) {
+      console.log("🚀 ~ user:", user);
+      console.log("🚀 ~ profile:", profile);
       return true;
     },
     async jwt({ token, user }) {
-      // jwt 방식
+      // jwt 방식, GET /api/auth/callback/google에는 user없음!
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -57,7 +59,7 @@ export const {
   trustHost: true,
   jwt: { maxAge: 30 * 60 },
   pages: {
-    // signIn: "/sign",
+    signIn: "/sign",
     error: "/sign/error",
   },
   session: {

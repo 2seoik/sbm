@@ -43,20 +43,20 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <div className="container mx-auto flex h-screen flex-col justify-center border">
-              <header className="flex justify-between border border-b-4 border-b-amber-300">
+              <header className="flex justify-between border border-b-4 border-b-amber-500">
                 <Link
                   href="/"
-                  className="flex items-center font-semibold text-3xl text-blue-800 tracking-tight"
+                  className="flex items-center font-semibold text-3xl text-zinc-800 tracking-tight"
                 >
                   <BookMarkedIcon size={28} />
-                  BookMark
+                  Book & Mark
                 </Link>
                 <Nav />
               </header>
               <main className="flex-1"> {children}</main>
               <footer>
                 <div className="flex justify-between">
-                  <div className="text-green-500">&#169; shlee 2025</div>
+                  <div className="text-zinc-500">&#169; shlee 2025</div>
                   <div>
                     <ThemeChanger />
                   </div>

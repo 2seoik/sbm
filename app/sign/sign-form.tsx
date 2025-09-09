@@ -50,7 +50,7 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
         </Button>
       </form>
       <div className="mt-5 flex gap-10">
-        <span>Already have Account</span>
+        <span>Already have account</span>
         <Link href="#" onClick={toggleSign}>
           Sign In
         </Link>
@@ -92,7 +92,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
         </Button>
       </form>
       <div className="mt-5 flex gap-10">
-        <span>Don&apos;t have Account?</span>
+        <span>Don&apos;t have account?</span>
         <Link href="#" onClick={toggleSign}>
           Sign Up
         </Link>

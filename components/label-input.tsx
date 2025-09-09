@@ -7,20 +7,21 @@ type Props = {
   label: string;
   type?: string;
   name?: string;
-  ref?: RefObject<HTMLInputElement | null>;
   placeholder?: string;
   className?: string;
+  ref?: RefObject<HTMLInputElement | null>;
 };
 export default function LabelInput({
   label,
   type,
   name,
-  ref,
   placeholder,
   className,
+  ref,
   ...props
 }: Props & ComponentProps<"input">) {
   const uniqueName = useId();
+
   return (
     <label htmlFor={uniqueName} className="font-semibold text-sm capitalize">
       {label}

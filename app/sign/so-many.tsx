@@ -1,4 +1,4 @@
-import Img from "@/components/img";
+import Img from "@/components/ui/img";
 
 type Props = { images: { src: string; alt: string }[] };
 export default function SoMany({ images }: Props) {

@@ -99,7 +99,6 @@ export const {
       return session;
     },
   },
-
   trustHost: true, // CORS
   jwt: { maxAge: 30 * 60 },
   pages: {

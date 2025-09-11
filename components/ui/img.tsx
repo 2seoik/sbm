@@ -1,5 +1,5 @@
-/** biome-ignore-all lint/performance/noImgElement: <explanation> */
-/** biome-ignore-all lint/correctness/useJsxKeyInIterable: <explanation> */
+/** biome-ignore-all lint/performance/noImgElement: img tag */
+/** biome-ignore-all lint/correctness/useJsxKeyInIterable: img tag */
 
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";

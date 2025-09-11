@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
-import { useReducer } from "react";
+import { useActionState, useReducer } from "react";
+import z from "zod";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
+import type { ValidError } from "@/lib/validator";
 import { authorize } from "./sign.action";
 
 export default function SignForm() {
-  const [isSignin, toggleSign] = useReducer((pre) => !pre, true);
+  const [isSignin, toggleSign] = useReducer((pre) => !pre, false);
   return (
     <>
       {isSignin ? (
@@ -83,35 +85,70 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
 }
 
 function SignUp({ toggleSign }: { toggleSign: () => void }) {
+  const [validError, makeRegist, isPending] = useActionState(
+    async (_pre: ValidError | undefined, formData: FormData) => {
+      const zobj = z
+        .object({
+          email: z.email(),
+          passwd: z.string().min(6),
+          passwd2: z.string().min(6),
+          nickname: z.string().min(3),
+        })
+        .refine(
+          ({ passwd, passwd2 }) => passwd === passwd2,
+          "비밀번호가 일치하지 않습니다."
+        )
+        .safeParse(Object.fromEntries(formData.entries()));
+
+      if (!zobj.success) {
+        const err = z.treeifyError(zobj.error).properties;
+        return err;
+      }
+    },
+    undefined
+  );
   return (
     <>
-      <form action="#" className="flex flex-col space-y-3">
+      <form action={makeRegist} className="flex flex-col space-y-3">
         <LabelInput
           label="email"
           type="email"
           name="email"
+          error={validError}
+          focus={true}
           placeholder="email@bookmark.com"
         />
         <LabelInput
           label="password"
           type="password"
           name="passwd"
+          error={validError}
+          focus={true}
           placeholder="Your Password..."
         />
         <LabelInput
           label="password confirm"
           type="password"
           name="passwd2"
+          error={validError}
+          focus={true}
           placeholder="Your Password..."
         />
         <LabelInput
           label="nickname"
           type="text"
           name="nickname"
+          error={validError}
+          focus={true}
           placeholder="Your NickName..."
         />
-        <Button type="submit" variant={"primary"} className="w-full">
-          Sign Up
+        <Button
+          type="submit"
+          variant={"primary"}
+          className="w-full"
+          disabled={isPending}
+        >
+          {isPending ? "Process..." : "Sign Up"}
         </Button>
       </form>
       <div className="mt-5 flex gap-10">

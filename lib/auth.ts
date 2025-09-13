@@ -65,7 +65,7 @@ export const {
         // TODO : 암호비교(compare) ==> 실패시 오류!
         // 성공하면 로그인
       } else {
-        // SNS 자동가입
+        // SNS 자동 회원가입
         if (!mbr && nickname) {
           await prisma.member.create({
             data: { email, nickname, image },

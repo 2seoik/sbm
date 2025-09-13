@@ -109,7 +109,7 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
         const valid = validator.error;
         const tree = z.treeifyError(valid);
 
-        // console.log("🚀 ~ validator:", validator);
+        // console.log("🚀 ~ validator:", valid.issues);
         // console.log("🚀 ~ tree:", tree);
 
         const errObject: ValidErrorObject = {

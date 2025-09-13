@@ -78,7 +78,9 @@ model Member {
   passwd     String?      @db.VarChar(128)
   image      String?      @db.VarChar(255)
   isadmin    Boolean      @default(false)
-  introduce  String?      @db.VarChar(1024)
+  emailcheck String?      @db.VarChar(256)
+  outdt      String?      @db.VarChar(10)
+  descript   String?      @db.VarChar(512)
   Book       Book[]
   FollowBook FollowBook[]
   Likes      Likes[]

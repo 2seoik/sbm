@@ -62,6 +62,7 @@ export const {
 
       if (isCredential) {
         if (!mbr) throw new AuthError("NotExistMember");
+        console.log("===========pass===========");
         // TODO : 암호비교(compare) ==> 실패시 오류!
         // 성공하면 로그인
       } else {

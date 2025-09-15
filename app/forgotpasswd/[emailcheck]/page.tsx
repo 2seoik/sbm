@@ -1,19 +1,22 @@
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
+import prisma from "@/lib/db";
 
 export default async function ResetForgotPasswd({
   params,
-}: Promise<{ emailcheck: true }>) {
+}: {
+  params: Promise<{ emailcheck: string }>;
+}) {
   const { emailcheck } = await params;
-  const mbr = "";
-  //   const mbr = await prisma.member.findFirst({
-  //     select: { nickname: true, emailcheck: true, email: true },
-  //     where: { emailcheck },
-  //   });
 
-  //   if (!mbr) {
-  //     return <h1>Error</h1>;
-  //   }
+  const mbr = await prisma.member.findFirst({
+    select: { nickname: true, emailcheck: true, email: true },
+    where: { emailcheck },
+  });
+
+  if (!mbr) {
+    return <h1>Error</h1>;
+  }
 
   const resetPassword = async () => {
     "use server";
@@ -27,21 +30,21 @@ export default async function ResetForgotPasswd({
         <div className="mb-5 text-gray-500 text-sm">Reset your password</div>
         <form action={resetPassword}>
           <LabelInput
+            label="new password"
             type="password"
-            label="passwd"
             name="passwd"
-            placeholder="New Password..."
             focus={true}
+            placeholder="New Password..."
           />
           <LabelInput
-            type="password"
             label="new passwd confirm"
+            type="password"
             name="passwd2"
-            placeholder="New Password..."
             focus={true}
+            placeholder="New Password..."
           />
           <Button type="submit" variant={"destructive"} className="mt-5 w-full">
-            change password
+            Change password
           </Button>
         </form>
       </div>

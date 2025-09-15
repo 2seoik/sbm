@@ -18,15 +18,15 @@ export default function ForgotPasswd() {
           <LabelInput
             label="email"
             name="email"
-            placeholder="email@bookmark.com"
             focus={true}
+            placeholder="email@bookmark.com"
           />
           <Button type="submit" variant={"success"} className="mt-5 w-full">
             Send Instructions Email
           </Button>
         </form>
         <div className="mt-5 text-center">
-          Back To <Link href="/sign">Login</Link>
+          Back To <Link href="/sign">SignIn</Link>
         </div>
       </div>
     </div>

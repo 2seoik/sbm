@@ -12,6 +12,10 @@ export const login = async (provider: Provider, callback?: string) => {
 
 export const loginNaver = async () => login("naver");
 
+export const logout = async () => {
+  await signOut({ redirectTo: "/sign" }); // TODO : 작업끝나고 '/' 로 변경
+};
+
 export const authorize = async (
   _pre: ValidError | undefined,
   formData: FormData
@@ -30,10 +34,6 @@ export const authorize = async (
     console.log("sign action", error);
     throw error;
   }
-};
-
-export const logout = async () => {
-  await signOut({ redirectTo: "/sign" }); // TODO : 작업끝나고 '/' 로 변경
 };
 
 export const regist = async (

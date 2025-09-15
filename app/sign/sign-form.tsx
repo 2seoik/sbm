@@ -10,8 +10,10 @@ export default function SignForm() {
   return (
     <>
       {isSignin ? (
+        // 로그인
         <SignIn toggleSign={toggleSign} />
       ) : (
+        // 회원가입
         <SignUp toggleSign={toggleSign} />
       )}
     </>
@@ -32,7 +34,8 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           name="email"
           type="email"
           error={validError}
-          defaultValue={"jeonseongho@naver.com"}
+          focus={true}
+          // defaultValue={"jeonseongho@naver.com"}
           placeholder="email@bookmark.com"
         />
         <LabelInput
@@ -40,7 +43,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           name="passwd"
           type="password"
           error={validError}
-          defaultValue={"11111111"}
+          // defaultValue={"11111111"}
           placeholder="Your Password"
         />
         <div className="flex justify-between">
@@ -85,7 +88,7 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
           type="email"
           name="email"
           error={validError}
-          // defaultValue={"email@bookmark.com"}
+          defaultValue={"email@bookmark.com"}
           focus={true}
           placeholder="email@bookmark.com"
         />

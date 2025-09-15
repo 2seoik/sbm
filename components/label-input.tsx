@@ -46,22 +46,10 @@ export default function LabelInput({
     if (!focus && !err.length) return;
 
     const keys = Object.keys(error ?? {});
-    // console.log("🚀 ~ focus:", focus);
-    // console.log("🚀 ~ keys:", keys);
-    // console.log("🚀 ~ name:", name);
-    // console.log("🚀 ~ err.length:", err.length);
-    // console.log("-----------------------------------");
-    if (!focus && (!err.length || keys[0] !== name)) {
-      console.log("name ===> ", name);
-      return;
-    }
+    if (!focus && (!err.length || keys[0] !== name)) return;
 
-    if (ref) {
-      ref.current?.focus();
-    } else {
-      console.log("name ===> ", name);
-      inpRef.current?.focus();
-    }
+    if (ref) ref.current?.focus();
+    else inpRef.current?.focus();
   }, [err]);
 
   return (

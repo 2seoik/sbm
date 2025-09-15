@@ -5,6 +5,7 @@ import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 import Naver from "next-auth/providers/naver";
 import z from "zod";
+import { findMemberByEmail } from "@/app/sign/sign.action";
 import prisma from "./db";
 
 export const {
@@ -52,13 +53,21 @@ export const {
       // console.log("🚀 ~ signIn user:", user);
       // console.log("🚀 ~ signIn profile:", profile);
       // console.log("🚀 ~ signIn account:", account);
-      console.log("🚀 ~ signIn isCredential:", isCredential);
+      // console.log("🚀 ~ signIn isCredential:", isCredential);
 
       const { email, name: nickname, image } = user;
       if (!email) return false;
 
-      const mbr = await prisma.member.findUnique({ where: { email } });
-      console.log("🚀 ~ mbr:", mbr);
+      const mbr = await findMemberByEmail(email, isCredential);
+      //prisma.member.findUnique({ where: { email } });s
+      console.log("🚀 ~ mbr ==========>", mbr);
+
+      if (mbr?.emailcheck) {
+        // 왜안되는지 확인할것..
+        // return redirect(`/sign/error?error=CheckEmail&email=${email}`);
+
+        return `/sign/error?error=CheckEmail&email=${email}`;
+      }
 
       if (isCredential) {
         if (!mbr) throw new AuthError("NotExistMember");

@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useActionState, useReducer } from "react";
+import { useSearchParams } from "next/navigation";
+import { useActionState, useEffect, useReducer, useRef } from "react";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
 import { authorize, regist } from "./sign.action";
 
 export default function SignForm() {
-  const [isSignin, toggleSign] = useReducer((pre) => !pre, false);
+  const [isSignin, toggleSign] = useReducer((pre) => !pre, true);
   return (
     <>
       {isSignin ? (
@@ -21,10 +22,21 @@ export default function SignForm() {
 }
 
 function SignIn({ toggleSign }: { toggleSign: () => void }) {
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+
+  const passwdRef = useRef<HTMLInputElement>(null);
+
   const [validError, makeLogin, isPending] = useActionState(
     authorize,
     undefined
   );
+
+  useEffect(() => {
+    if (email) {
+      passwdRef.current?.focus();
+    }
+  }, [email]);
 
   return (
     <>
@@ -35,6 +47,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           type="email"
           error={validError}
           focus={true}
+          defaultValue={email || ""}
           // defaultValue={"jeonseongho@naver.com"}
           placeholder="email@bookmark.com"
         />
@@ -43,6 +56,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           name="passwd"
           type="password"
           error={validError}
+          ref={passwdRef}
           // defaultValue={"11111111"}
           placeholder="Your Password"
         />
@@ -77,6 +91,17 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
   );
 }
 
+const dummy = {
+  // email: "seoikk21@gmail.com",
+  // passwd: "12121212",
+  // passwd2: "12121212",
+  // nickname: "",
+  email: "",
+  passwd: "",
+  passwd2: "",
+  nickname: "",
+};
+
 function SignUp({ toggleSign }: { toggleSign: () => void }) {
   const [validError, makeRegist, isPending] = useActionState(regist, undefined);
 
@@ -88,15 +113,24 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
           type="email"
           name="email"
           error={validError}
-          defaultValue={"email@bookmark.com"}
+          defaultValue={dummy.email}
           focus={true}
           placeholder="email@bookmark.com"
+        />
+        <LabelInput
+          label="nickname"
+          type="text"
+          name="nickname"
+          error={validError}
+          defaultValue={dummy.nickname}
+          placeholder="Your NickName..."
         />
         <LabelInput
           label="password"
           type="password"
           name="passwd"
           error={validError}
+          defaultValue={dummy.passwd}
           placeholder="Your Password..."
         />
         <LabelInput
@@ -104,15 +138,10 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
           type="password"
           name="passwd2"
           error={validError}
+          defaultValue={dummy.passwd2}
           placeholder="Your Password..."
         />
-        <LabelInput
-          label="nickname"
-          type="text"
-          name="nickname"
-          error={validError}
-          placeholder="Your NickName..."
-        />
+
         <Button
           type="submit"
           variant={"primary"}

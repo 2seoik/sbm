@@ -15,7 +15,7 @@ const TRANS = createTransport({
   auth: { user, pass },
 });
 
-const FROM = '"BookMark" <indiflex1@gmail.com>';
+const FROM = '"BookMark" <seoikk21@gmail.com>';
 
 const sendMail = async (
   to: string, // 수신자
@@ -26,7 +26,7 @@ const sendMail = async (
   TRANS.sendMail({
     from: FROM,
     to,
-    bcc: "indiflex.sico@gmail.com",
+    bcc: "bangka17@naver.com",
     subject,
     html,
     attachments,
@@ -61,7 +61,7 @@ export const sendPasswordReset = async (
       <h3 style="margin: 10px 0;">
         Click the link below to reset your password.
       </h3>
-      <a href="${process.env.NEXT_PUBLIC_URL}/passwdcheck/${authKey}">Reset Password</a>
+      <a href="${process.env.NEXT_PUBLIC_URL}/forgotpasswd/${authKey}">Reset Password</a>
     </div>
   `;
 

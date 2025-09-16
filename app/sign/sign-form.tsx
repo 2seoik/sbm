@@ -118,14 +118,6 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
           placeholder="email@bookmark.com"
         />
         <LabelInput
-          label="nickname"
-          type="text"
-          name="nickname"
-          error={validError}
-          defaultValue={dummy.nickname}
-          placeholder="Your NickName..."
-        />
-        <LabelInput
           label="password"
           type="password"
           name="passwd"
@@ -141,7 +133,14 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
           defaultValue={dummy.passwd2}
           placeholder="Your Password..."
         />
-
+        <LabelInput
+          label="nickname"
+          type="text"
+          name="nickname"
+          error={validError}
+          defaultValue={dummy.nickname}
+          placeholder="Your NickName..."
+        />
         <Button
           type="submit"
           variant={"primary"}

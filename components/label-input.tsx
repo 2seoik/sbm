@@ -8,14 +8,14 @@ import {
   useRef,
 } from "react";
 import { cn } from "@/lib/utils";
-import type { ValidError } from "@/lib/validator";
+import type { FailureValid } from "@/lib/validator";
 import { Input } from "./ui/input";
 
 type Props = {
   label: string;
   type?: string;
   name?: string;
-  error?: ValidError;
+  error?: FailureValid;
   focus?: boolean;
   defaultValue?: string | number;
   placeholder?: string;
@@ -23,6 +23,7 @@ type Props = {
   inputClassName?: string;
   ref?: RefObject<HTMLInputElement | null>;
 };
+
 export default function LabelInput({
   label,
   type,
@@ -38,19 +39,24 @@ export default function LabelInput({
 }: Props & ComponentProps<"input">) {
   const uniqueName = useId();
   const inpRef = useRef<HTMLInputElement>(null);
-  const err = !!error && !!name && error[name] ? error[name].errors : [];
-  const val =
-    !!error && !!name && error[name] ? error[name].value?.toString() : "";
+  const err = error && name ? error.error[name] : { errors: [], value: "" };
+  const val = err?.value?.toString();
+
+  // const err =
+  //   !!error && !!name && error.error[name] ? error.error[name].errors : [];
+  // const val =
+  //   !!error && !!name && error.error[name]
+  //     ? error.error[name].value?.toString()
+  //     : "";
 
   useEffect(() => {
-    if (!focus && !err.length) return;
-
-    const keys = Object.keys(error ?? {});
-    if (!focus && (!err.length || keys[0] !== name)) return;
+    if (!focus && !err.errors.length) return;
+    const keys = Object.keys(error?.error ?? {});
+    if (!focus && (!err.errors.length || keys[0] !== name)) return;
 
     if (ref) ref.current?.focus();
     else inpRef.current?.focus();
-  }, [err]);
+  }, [err.errors]);
 
   return (
     <div className={cn(className)}>
@@ -69,7 +75,7 @@ export default function LabelInput({
           )}
           {...props}
         />
-        {err.map((e) => (
+        {err.errors.map((e) => (
           <span key={e} className="font-medium text-red-500">
             {e}
           </span>

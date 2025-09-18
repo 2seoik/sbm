@@ -2,6 +2,7 @@
 
 import { hash } from "bcryptjs";
 import { redirect } from "next/navigation";
+import { AuthError } from "next-auth";
 import z from "zod";
 import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
@@ -9,13 +10,14 @@ import { newToken } from "@/lib/utils";
 import { type ValidError, validate } from "@/lib/validator";
 import { sendRegistCheck } from "./mail.actions";
 
-type Provider = "google" | "github" | "naver" | "kakao";
+export type Provider = "google" | "github" | "naver" | "kakao";
 
-export const login = async (provider: Provider, callback?: string) => {
+export const login = async (provider: Provider, callback?: string | null) => {
   await signIn(provider, { redirectTo: callback || "/bookcase" });
 };
 
-export const loginNaver = async () => login("naver");
+export const loginNaver = async (redirectTo?: string | null) =>
+  login("naver", redirectTo);
 
 export const logout = async () => {
   await signOut({ redirectTo: "/sign" }); // TODO : 작업끝나고 '/' 로 변경
@@ -34,10 +36,36 @@ export const authorize = async (
   if (err) return err;
 
   try {
-    await signIn("credentials", { ...data, redirectTo: "/bookace/" });
+    const redirectTo = formData.get("redirectTo")?.toString() || "/bookcase";
+    await signIn("credentials", { ...data, redirectTo });
     // await signIn("credentials", formData);
   } catch (error) {
     console.log("sign.action.authorize Error ---->", error);
+
+    if (error instanceof AuthError) {
+      let typeErr: string;
+      switch (error.type) {
+        case "AccessDenied":
+        case "EmailSignInError": // email magic link
+          typeErr = error.message.split("Read more")[0];
+          break;
+        case "OAuthAccountNotLinked":
+          typeErr = `Already registed SNS Account`;
+          break;
+        case "CredentialsSignin":
+          typeErr =
+            error.message.split("Read more")[0] ||
+            "Not match Email or Password!";
+          break;
+        default:
+          typeErr = error.message || "Something went wrong!";
+      }
+
+      return {
+        email: { errors: [typeErr], value: data?.email },
+        passwd: { errors: [], value: data.passwd },
+      } as ValidError;
+    }
     throw error;
   }
 };
@@ -91,6 +119,7 @@ export const findMemberByEmail = async (
       nickname: true,
       isadmin: true,
       emailcheck: true,
+      outdt: true,
       passwd,
     },
     where: { email },

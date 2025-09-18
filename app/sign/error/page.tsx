@@ -16,7 +16,7 @@ export default function AuthError({ searchParams }: Props) {
   return (
     <div className="grid h-full place-items-center">
       <div className="text-center">
-        <h1 className="mb-5 font-semibold text-2xl">Sign Error Occured</h1>
+        <h1 className="mb-5 font-semibold text-2xl">{error}</h1>
         <div className="mb-5 text-red-500">{getMessage(error)}</div>
 
         <div className="">

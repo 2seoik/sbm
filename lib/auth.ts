@@ -1,4 +1,5 @@
-import NextAuth, { AuthError, type User } from "next-auth";
+import { compare } from "bcryptjs";
+import NextAuth, { AuthError } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
@@ -7,6 +8,7 @@ import Naver from "next-auth/providers/naver";
 import z from "zod";
 import { findMemberByEmail } from "@/app/sign/sign.action";
 import prisma from "./db";
+import { validateObject } from "./validator";
 
 export const {
   handlers: { GET, POST },
@@ -27,55 +29,60 @@ export const {
       },
       async authorize(credentials) {
         console.log("credentials --->", credentials);
-        const { email, passwd } = credentials;
 
         // 유효성 검사
-        const validator = z
-          .object({
-            email: z.email("잘못된 이메일 형식입니다."),
-            passwd: z.string().min(6, "패스워드는 6자리 이상입니다."),
-          })
-          .safeParse({ email, passwd });
+        const zobj = z.object({
+          email: z.email("잘못된 이메일 형식입니다."),
+          passwd: z.string().min(6, "패스워드는 6자리 이상입니다."),
+        });
 
-        if (!validator.success) {
-          // console.log("🚀 ~ validator.error:", validator.error);
-          throw new AuthError(validator.error.message);
-        }
+        const [err, data] = validateObject(zobj, credentials);
+        if (err) return err;
 
-        return { email, passwd } as User;
+        return data;
       },
     }),
   ],
   callbacks: {
     async signIn({ user, profile, account }) {
-      const isCredential = account?.provider === "credentials";
+      // console.log("🚀 ~ user:", user);
+      // console.log("🚀 ~ profile:", profile);
+      // console.log("🚀 ~ account:", account);
 
-      // console.log("🚀 ~ signIn user:", user);
-      // console.log("🚀 ~ signIn profile:", profile);
-      // console.log("🚀 ~ signIn account:", account);
-      // console.log("🚀 ~ signIn isCredential:", isCredential);
+      const isCredential = account?.provider === "credentials";
 
       const { email, name: nickname, image } = user;
       if (!email) return false;
 
       const mbr = await findMemberByEmail(email, isCredential);
-      //prisma.member.findUnique({ where: { email } });s
-      console.log("🚀 ~ mbr ==========>", mbr);
+      //prisma.member.findUnique({ where: { email } });
+      console.log("🚀 ~ 회원정보 ==========>", mbr);
 
       if (mbr?.emailcheck) {
         // 왜안되는지 확인할것..
         // return redirect(`/sign/error?error=CheckEmail&email=${email}`);
 
-        return `/sign/error?error=CheckEmail&email=${email}`;
+        // TODO : 이메일 승인 받지 않은상태에서 로그인 했을경우 이메일체크 다시 보내기
+        return `/sign/error?error=CheckEmail&email=${email}&oldEmailcheck=${mbr.emailcheck}`;
       }
 
+      // 이메일, 비밀번호 가입
       if (isCredential) {
-        if (!mbr) throw new AuthError("NotExistMember");
-        console.log("===========pass===========");
-        // TODO : 암호비교(compare) ==> 실패시 오류!
-        // 성공하면 로그인
-      } else {
-        // SNS 자동가입
+        if (!mbr)
+          throw authError("존재하지 않는 회원입니다.", "EmailSignInError");
+        if (mbr.outdt) throw authError("탈퇴한 회원입니다.", "AccessDenied");
+        if (!mbr.passwd)
+          throw authError(
+            "SNS로 가입한 회원입니다. SNS 로그인을 진행해주세요.",
+            "OAuthAccountNotLinked"
+          );
+
+        const isValiedPasswd = await compare(user.passwd ?? "", mbr.passwd);
+        if (!isValiedPasswd)
+          throw authError("비밀번호가 일치하지 않습니다.", "EmailSignInError");
+      }
+      // SNS 자동 가입
+      else {
         if (!mbr && nickname) {
           await prisma.member.create({
             data: { email, nickname, image },
@@ -97,6 +104,8 @@ export const {
         token.id = userData.id;
         token.email = userData.email;
         token.name = userData.name || userData.nickname;
+        token.image = userData.image;
+        token.isadmin = userData.isadmin;
       }
       return token;
     },
@@ -105,6 +114,8 @@ export const {
         session.user.id = token.id?.toString() || "";
         session.user.name = token.name;
         session.user.email = token.email as string;
+        session.user.image = token.image as string;
+        session.user.isadmin = token.isadmin;
       }
       return session;
     },
@@ -120,3 +131,10 @@ export const {
   },
   secret: process.env.AUTH_SECRET as string,
 });
+
+function authError(message: string, type: AuthError["type"]) {
+  console.log("🚀 ~ message ------> ", message);
+  const authError = new AuthError(message);
+  authError.type = type as typeof authError.type; //"EmailSignInError";
+  return authError;
+}

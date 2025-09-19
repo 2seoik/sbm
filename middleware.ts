@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
 
 // TODO : remove nodejs runtime!
 export const config = {
-  runtime: "nodejs",
+  // runtime: "nodejs",
 
   matcher: [
     "/((?!sign|_next/static|_next/image|api/auth|forgotpasswd|registcheck|favicon.ico|robots.txt|.well-known|$).*)",

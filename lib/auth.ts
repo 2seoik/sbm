@@ -54,6 +54,7 @@ export const {
       const { email, name: nickname, image } = user;
       if (!email) return false;
 
+      console.log("🚀 ~ isCredential:", isCredential);
       const mbr = await findMemberByEmail(email, isCredential);
       //prisma.member.findUnique({ where: { email } });
       console.log("🚀 ~ 회원정보 ==========>", mbr);
@@ -63,7 +64,7 @@ export const {
         // return redirect(`/sign/error?error=CheckEmail&email=${email}`);
 
         // TODO : 이메일 승인 받지 않은상태에서 로그인 했을경우 이메일체크 다시 보내기
-        return `/sign/error?error=CheckEmail&email=${email}&oldEmailcheck=${mbr.emailcheck}`;
+        return `/sign/error?error=CheckEmail&email=${email}&emailcheck=${mbr.emailcheck}`;
       }
 
       // 이메일, 비밀번호 가입
@@ -109,6 +110,7 @@ export const {
       }
       return token;
     },
+
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id?.toString() || "";

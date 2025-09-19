@@ -22,16 +22,15 @@ const sendMail = async (
   subject: string, // 제목
   html: string, // 내용
   attachments?: Attachments // 첨부파일
-) => {
+) =>
   TRANS.sendMail({
     from: FROM,
     to,
-    bcc: "bangka17@naver.com",
+    bcc: "bangka17@naver.com", // TODO : 참조
     subject,
     html,
     attachments,
   });
-};
 
 export const sendRegistCheck = async (to: string, authKey: string) => {
   const subject = "[BookMark] Regist Authentication Mail";
@@ -45,7 +44,7 @@ export const sendRegistCheck = async (to: string, authKey: string) => {
     </div>
   `;
 
-  sendMail(to, subject, html);
+  return sendMail(to, subject, html);
 };
 
 export const sendPasswordReset = async (
@@ -65,5 +64,5 @@ export const sendPasswordReset = async (
     </div>
   `;
 
-  sendMail(to, subject, html);
+  return sendMail(to, subject, html);
 };

@@ -8,7 +8,6 @@ import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { newToken } from "@/lib/utils";
 import { type ValidError, validate } from "@/lib/validator";
-import { sendRegistCheck } from "./mail.actions";
 
 export type Provider = "google" | "github" | "naver" | "kakao";
 
@@ -23,6 +22,7 @@ export const logout = async () => {
   await signOut({ redirectTo: "/sign" }); // TODO : 작업끝나고 '/' 로 변경
 };
 
+// 로그인
 export const authorize = async (
   _pre: ValidError | undefined,
   formData: FormData
@@ -70,6 +70,7 @@ export const authorize = async (
   }
 };
 
+// 회원가입
 export const regist = async (
   _pre: ValidError | undefined,
   formData: FormData
@@ -94,7 +95,7 @@ export const regist = async (
   const mbr = await findMemberByEmail(email);
   if (mbr)
     return {
-      email: { errors: ["Duplicated Email Address!"], value: email },
+      email: { errors: ["이미 존재하는 이메일입니다."], value: email },
     } as ValidError;
 
   const passwd = await hash(orgPasswd, 10);
@@ -104,7 +105,17 @@ export const regist = async (
     data: { email, nickname, passwd, emailcheck },
   });
 
-  await sendRegistCheck(email, emailcheck);
+  // await sendRegistCheck(email, emailcheck);
+
+  // Next의 fetch (edge 런타임에서 실행)
+  const { NEXT_PUBLIC_URL, INTERNAL_SECRET } = process.env;
+  fetch(`${NEXT_PUBLIC_URL}/api/sendemail`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${INTERNAL_SECRET}`,
+    },
+    body: JSON.stringify({ email, emailcheck }),
+  });
 
   redirect(`/sign/error?error=CheckEmail&email=${email}`);
 };

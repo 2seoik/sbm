@@ -54,14 +54,14 @@ export const {
       const { email, name: nickname, image } = user;
       if (!email) return false;
 
-      console.log("🚀 ~ isCredential:", isCredential);
       const mbr = await findMemberByEmail(email, isCredential);
       //prisma.member.findUnique({ where: { email } });
-      console.log("🚀 ~ 회원정보 ==========>", mbr);
+      console.log("🚀 ~ 회원정보 ==========>", isCredential, mbr);
 
+      // 이메일체크를 하지 않은 사용자일경우...
       if (mbr?.emailcheck) {
-        // 왜안되는지 확인할것..
-        // return redirect(`/sign/error?error=CheckEmail&email=${email}`);
+        // 아래 구문은 왜안되는지 확인할것..
+        // return redirect(`/sign/error?error=....&email=${email}`);
 
         // TODO : 이메일 승인 받지 않은상태에서 로그인 했을경우 이메일체크 다시 보내기
         return `/sign/error?error=CheckEmail&email=${email}&emailcheck=${mbr.emailcheck}`;
@@ -77,10 +77,9 @@ export const {
             "SNS로 가입한 회원입니다. SNS 로그인을 진행해주세요.",
             "OAuthAccountNotLinked"
           );
-
         const isValiedPasswd = await compare(user.passwd ?? "", mbr.passwd);
         if (!isValiedPasswd)
-          throw authError("비밀번호가 일치하지 않습니다.", "EmailSignInError");
+          throw authError("비밀번호가 일치하지 않습니다!", "EmailSignInError");
       }
       // SNS 자동 가입
       else {
@@ -98,6 +97,7 @@ export const {
 
       // token 갱신 "signIn" | "signUp" | "update"
       // update 일때만 session
+      console.log("🚀 ~ user:", user);
       const userData = trigger === "update" ? session : user;
       console.log("🚀 ~ userData:", userData);
 
@@ -107,7 +107,16 @@ export const {
         token.name = userData.name || userData.nickname;
         token.image = userData.image;
         token.isadmin = userData.isadmin;
+
+        if (account) {
+          console.log("🚀 ~ account ======>", token.accessToken);
+          token.accessToken = account?.access_token;
+          token.accessTokenExpires =
+            Date.now() + (account.expires_in ?? 0) * 1000;
+          token.refreshToken = account.refresh_token;
+        }
       }
+
       return token;
     },
 

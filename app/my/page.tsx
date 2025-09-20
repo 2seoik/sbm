@@ -1,4 +1,3 @@
-import Link from "next/link";
 import SignOutButton from "@/components/signout-button";
 
 export default function My() {
@@ -11,7 +10,7 @@ export default function My() {
       <div className="w-96 border p-5 text-center">
         <h1 className="mb-5 text-3xl">My Page</h1>
         <div className="flex justify-around">
-          <Link href="/api/auth/signout">Goto SignOut</Link>
+          {/* <Link href="/api/auth/signout">Goto SignOut</Link> */}
           <SignOutButton />
         </div>
       </div>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useReducer, useRef } from "react";
 import LabelInput from "@/components/label-input";
+import { LoadingIcon } from "@/components/loading-icon";
 import { Button } from "@/components/ui/button";
 import { authorize, regist } from "./sign.action";
 
@@ -87,7 +88,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           className="w-full"
           disabled={isPending}
         >
-          {isPending ? "dd" : "Sign In"}
+          <LoadingIcon isPending={isPending} text={"Sign In"} />
         </Button>
       </form>
       <div className="mt-5 flex gap-10">
@@ -157,7 +158,7 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
           className="w-full"
           disabled={isPending}
         >
-          {isPending ? "Process..." : "Sign Up"}
+          <LoadingIcon isPending={isPending} text={"Sign Up"} />
         </Button>
       </form>
       <div className="mt-5 flex gap-10">

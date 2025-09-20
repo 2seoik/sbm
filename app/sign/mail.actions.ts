@@ -31,7 +31,6 @@ const sendMail = async (
     html,
     attachments,
   });
-
 export const sendRegistCheck = async (to: string, authKey: string) => {
   const subject = "[BookMark] Regist Authentication Mail";
   const html = `
@@ -52,6 +51,7 @@ export const sendPasswordReset = async (
   authKey: string,
   nickname?: string
 ) => {
+  console.log("🚀 ~ to:", to);
   const subject = "[Bookmark] Reset Password";
   const html = `
     <div style="display: grid; place-items: center; height: 200px;">

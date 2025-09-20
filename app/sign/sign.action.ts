@@ -8,6 +8,7 @@ import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { newToken } from "@/lib/utils";
 import { type ValidError, validate } from "@/lib/validator";
+import type { SendMailBody } from "../api/sendmail/route";
 
 export type Provider = "google" | "github" | "naver" | "kakao";
 
@@ -77,10 +78,10 @@ export const regist = async (
 ) => {
   const zobj = z
     .object({
-      email: z.email(),
-      passwd: z.string().min(1),
-      passwd2: z.string().min(1),
-      nickname: z.string().min(1),
+      email: z.email("잘못된 이메일 형식입니다."),
+      passwd: z.string().min(6),
+      passwd2: z.string().min(6),
+      nickname: z.string().min(3),
     })
     .refine(({ passwd, passwd2 }) => passwd === passwd2, {
       error: "비밀번호가 일치하지 않습니다.",
@@ -108,18 +109,140 @@ export const regist = async (
   // await sendRegistCheck(email, emailcheck);
 
   // Next의 fetch (edge 런타임에서 실행)
-  const { NEXT_PUBLIC_URL, INTERNAL_SECRET } = process.env;
-  fetch(`${NEXT_PUBLIC_URL}/api/sendemail`, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${INTERNAL_SECRET}`,
-    },
-    body: JSON.stringify({ email, emailcheck }),
-  });
+  sendMailByFetch({ email, emailcheck });
 
   redirect(`/sign/error?error=CheckEmail&email=${email}`);
 };
 
+// 비밀번호 변경이메일 발송
+export const sendResetPassword = async (
+  _: ValidError | undefined,
+  formData: FormData
+) => {
+  const zobj = z.object({
+    email: z.email("잘못된 이메일 형식입니다."),
+  });
+
+  const [err, data] = validate(zobj, formData);
+  if (err) return err;
+
+  const { email } = data;
+
+  const mbr = await findMemberByEmail(email);
+  if (!mbr)
+    return {
+      email: {
+        errors: ["존재하지 않는 이메일입니다. 이메일을 확인 해주세요."],
+        value: email,
+      },
+    };
+
+  const emailcheck = newToken();
+  const { nickname } = await prisma.member.update({
+    select: { nickname: true },
+    where: { email },
+    data: {
+      emailcheck,
+    },
+  });
+
+  const rs = await sendMailByFetch({
+    email,
+    emailcheck,
+    nickname,
+    emailType: "resetPassword",
+  });
+
+  if (!rs.ok) return { email: { errors: ["이메일 발송을 실패했습니다."] } };
+  redirect(`/sign/error?error=CheckEmail&email=${email}`);
+};
+
+// 인증 메일 다시 보내기
+export const resendRegist = async (
+  _: ValidError | undefined,
+  formData: FormData
+) => {
+  const zobj = z.object({
+    email: z.email("잘못된 이메일 형식입니다."),
+    emailcheck: z.uuidv4(),
+  });
+
+  const [err, data] = validate(zobj, formData);
+  if (err) return err;
+
+  const { email, emailcheck } = data;
+  const mbr = await findMemberByEmail(email);
+
+  if (!mbr || mbr.emailcheck !== emailcheck) {
+    redirect("/sign/error?error=EmailSendFail");
+  }
+
+  const newEmailCheck = newToken();
+  await prisma.member.update({
+    where: {
+      email,
+    },
+    data: {
+      emailcheck: newEmailCheck,
+    },
+  });
+
+  const rs = await sendMailByFetch({
+    email,
+    emailcheck: newEmailCheck,
+  });
+
+  if (!rs.ok) return { email: { errors: ["이메일 발송을 실패했습니다."] } };
+
+  redirect(`/sign/error?error=CheckEmail&email=${email}`);
+};
+
+// 비밀번호 변경
+export const resetPassword = async (
+  _: ValidError | undefined,
+  formData: FormData
+) => {
+  const zobj = z
+    .object({
+      email: z.email(), //
+      emailcheck: z.uuidv4(), //
+      passwd: z.string().min(6),
+      passwd2: z.string().min(6),
+    })
+    .refine(({ passwd, passwd2 }) => passwd === passwd2, {
+      message: "비밀번호가 일치하지 않습니다.",
+      path: ["passwd2"],
+    });
+
+  const [err, data] = validate(zobj, formData);
+  if (err) return err;
+
+  const { email, emailcheck, passwd: newPasswd } = data;
+
+  const mbr = await findMemberByEmail(email);
+
+  if (!mbr)
+    return {
+      email: { errors: ["존재하지 않는 이메일입니다."], values: email },
+    };
+
+  if (mbr.emailcheck !== emailcheck) {
+    redirect("/sign/error?error=EmailSendFail");
+  }
+
+  const passwd = await hash(newPasswd, 10);
+  await prisma.member.update({
+    where: { email, emailcheck },
+    data: {
+      passwd,
+      emailcheck: null,
+    },
+  });
+
+  redirect(`/sign?email=${email}`);
+};
+
+// 이메일로 회원찾기
 export const findMemberByEmail = async (
   email: string,
   passwd: boolean = false
@@ -135,3 +258,21 @@ export const findMemberByEmail = async (
     },
     where: { email },
   });
+
+// 메일 보내기
+const sendMailByFetch = async ({
+  email,
+  emailcheck,
+  nickname,
+  emailType = "regist",
+}: SendMailBody) => {
+  const { NEXT_PUBLIC_URL, INTERNAL_SECRET } = process.env;
+
+  return fetch(`${NEXT_PUBLIC_URL}/api/sendmail`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${INTERNAL_SECRET}`,
+    },
+    body: JSON.stringify({ email, emailcheck, nickname, emailType }),
+  });
+};

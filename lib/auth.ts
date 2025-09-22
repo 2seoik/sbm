@@ -28,9 +28,8 @@ export const {
         passwd: {},
       },
       async authorize(credentials) {
-        console.log("credentials --->", credentials);
+        // console.log("credentials --->", credentials);
 
-        // 유효성 검사
         const zobj = z.object({
           email: z.email("잘못된 이메일 형식입니다."),
           passwd: z.string().min(6, "패스워드는 6자리 이상입니다."),
@@ -45,9 +44,9 @@ export const {
   ],
   callbacks: {
     async signIn({ user, profile, account }) {
-      // console.log("🚀 ~ user:", user);
-      // console.log("🚀 ~ profile:", profile);
-      // console.log("🚀 ~ account:", account);
+      console.log("🚀 ~ user:", user);
+      console.log("🚀 ~ profile:", profile);
+      console.log("🚀 ~ account:", account);
 
       const isCredential = account?.provider === "credentials";
 
@@ -56,18 +55,7 @@ export const {
 
       const mbr = await findMemberByEmail(email, isCredential);
       //prisma.member.findUnique({ where: { email } });
-      console.log("🚀 ~ 회원정보 ==========>", isCredential, mbr);
 
-      // 이메일체크를 하지 않은 사용자일경우...
-      if (mbr?.emailcheck) {
-        // 아래 구문은 왜안되는지 확인할것..
-        // return redirect(`/sign/error?error=....&email=${email}`);
-
-        // TODO : 이메일 승인 받지 않은상태에서 로그인 했을경우 이메일체크 다시 보내기
-        return `/sign/error?error=CheckEmail&email=${email}&emailcheck=${mbr.emailcheck}`;
-      }
-
-      // 이메일, 비밀번호 가입
       if (isCredential) {
         if (!mbr)
           throw authError("존재하지 않는 회원입니다.", "EmailSignInError");
@@ -77,12 +65,16 @@ export const {
             "SNS로 가입한 회원입니다. SNS 로그인을 진행해주세요.",
             "OAuthAccountNotLinked"
           );
+
         const isValiedPasswd = await compare(user.passwd ?? "", mbr.passwd);
         if (!isValiedPasswd)
-          throw authError("비밀번호가 일치하지 않습니다!", "EmailSignInError");
-      }
-      // SNS 자동 가입
-      else {
+          throw authError("비밀번호가 일치하지 않습니다!", "CredentialsSignin");
+
+        // 이메일 승인 받지 않은상태에서 로그인 했을경우 이메일체크 다시 보내기
+        if (mbr?.emailcheck) {
+          return `/sign/error?error=CheckEmail&email=${email}&emailcheck=${mbr.emailcheck}`;
+        }
+      } else {
         if (!mbr && nickname) {
           await prisma.member.create({
             data: { email, nickname, image },
@@ -93,13 +85,16 @@ export const {
     },
     // jwt 방식, GET /api/auth/callback/google에는 user없음!
     async jwt({ token, user, trigger, account, session }) {
+      console.log("🚀 ~jwt session:", session);
+      console.log("🚀 ~jwt account:", account);
+      console.log("🚀 ~jwt trigger:", trigger);
+      console.log("🚀 ~jwt user:", user);
+      console.log("🚀 ~jwt token:", token);
       // console.log("🚀 ~ account:", account);
 
       // token 갱신 "signIn" | "signUp" | "update"
       // update 일때만 session
-      console.log("🚀 ~ user:", user);
       const userData = trigger === "update" ? session : user;
-      console.log("🚀 ~ userData:", userData);
 
       if (userData) {
         token.id = userData.id;
@@ -121,6 +116,8 @@ export const {
     },
 
     async session({ session, token }) {
+      console.log("🚀 ~ session token:", token);
+      console.log("🚀 ~ session session:", session);
       if (token) {
         session.user.id = token.id?.toString() || "";
         session.user.name = token.name;

@@ -16,14 +16,14 @@ export default function ResetPassword({ email, emailcheck }: Props) {
     undefined
   );
 
-  const change = (formData: FormData) => {
+  const reset = (formData: FormData) => {
     formData.set("email", email);
     formData.set("emailcheck", emailcheck);
     formAction(formData);
   };
 
   return (
-    <form action={change}>
+    <form action={reset}>
       <LabelInput
         label="new password"
         type="password"

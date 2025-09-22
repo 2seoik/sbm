@@ -47,10 +47,11 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
 
   return (
     <>
-      <form action={makeLogin} className="flex flex-col space-y-2">
-        {redirectTo && (
+      {/* hidden 필드 넣고, makeLogin 함수 직접 호출하여도 무방, 하지만 hidden 값이 쉽게 노출될 우려가 있음. */}
+      <form action={makeLoginAction} className="flex flex-col space-y-2">
+        {/* {redirectTo && (
           <input type="hidden" name="redirectTo" value={redirectTo} />
-        )}
+        )} */}
         <LabelInput
           label="email"
           name="email"

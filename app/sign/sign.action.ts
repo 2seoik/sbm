@@ -23,7 +23,7 @@ export const logout = async () => {
   await signOut({ redirectTo: "/sign" }); // TODO : 작업끝나고 '/' 로 변경
 };
 
-// 로그인
+// credential 로그인
 export const authorize = async (
   _pre: ValidError | undefined,
   formData: FormData
@@ -116,7 +116,7 @@ export const regist = async (
 
 // 비밀번호 변경이메일 발송
 export const sendResetPassword = async (
-  _: ValidError | undefined,
+  _pre: ValidError | undefined,
   formData: FormData
 ) => {
   const zobj = z.object({
@@ -137,6 +137,16 @@ export const sendResetPassword = async (
       },
     };
 
+  // 비밀번호 찾기 이메일발송을 여러번 할수있는경우가 생길수있음.
+  if (mbr.emailcheck) {
+    return {
+      email: {
+        errors: ["이미 인증메일이 발송되었습니다. 이메일을 확인 해주세요."],
+        value: email,
+      },
+    };
+  }
+
   const emailcheck = newToken();
   const { nickname } = await prisma.member.update({
     select: { nickname: true },
@@ -154,6 +164,7 @@ export const sendResetPassword = async (
   });
 
   if (!rs.ok) return { email: { errors: ["이메일 발송을 실패했습니다."] } };
+
   redirect(`/sign/error?error=CheckEmail&email=${email}`);
 };
 
@@ -221,13 +232,13 @@ export const resetPassword = async (
 
   const mbr = await findMemberByEmail(email);
 
-  if (!mbr)
-    return {
-      email: { errors: ["존재하지 않는 이메일입니다."], values: email },
-    };
+  // if (!mbr)
+  //   return {
+  //     passwd: { errors: ["존재하지 않는 이메일입니다."] },
+  //   };
 
-  if (mbr.emailcheck !== emailcheck) {
-    redirect("/sign/error?error=EmailSendFail");
+  if (!mbr || mbr.emailcheck !== emailcheck) {
+    redirect("/sign/error?error=InvalidEmailCheck");
   }
 
   const passwd = await hash(newPasswd, 10);

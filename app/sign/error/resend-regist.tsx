@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState } from "react";
-import { LoadingIcon } from "@/components/loading-icon";
 import { Button } from "@/components/ui/button";
 import { resendRegist } from "../sign.action";
 
@@ -26,11 +25,11 @@ export default function ResendRegist({ email, emailcheck }: Props) {
   return (
     <form action={send}>
       <Button type="submit" variant={"primary"} disabled={isPending}>
-        {/* Resend email to <b>{email}</b> */}
-        <LoadingIcon
+        Resend email to <b>{email}</b>
+        {/* <LoadingIcon
           isPending={isPending}
           text={"Resend email to <b>{email}</b>"}
-        />
+        /> */}
       </Button>
       {validError && (
         <div className="text-red-500">

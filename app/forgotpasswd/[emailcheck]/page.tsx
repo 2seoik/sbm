@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
-import ResetPassword from "../reset-passwd";
+import ResetPassword from "./reset-passwd";
 
 export default async function ResetForgotPasswd({
   params,

@@ -263,6 +263,7 @@ export const findMemberByEmail = async (
       id: true,
       nickname: true,
       isadmin: true,
+      image: true,
       emailcheck: true,
       outdt: true,
       passwd,

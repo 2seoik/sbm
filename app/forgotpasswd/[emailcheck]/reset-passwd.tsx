@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import LabelInput from "@/components/label-input";
 import { LoadingIcon } from "@/components/loading-icon";
 import { Button } from "@/components/ui/button";
-import { resetPassword } from "../sign/sign.action";
+import { resetPassword } from "../../sign/sign.action";
 
 type Props = {
   email: string;
@@ -19,6 +19,7 @@ export default function ResetPassword({ email, emailcheck }: Props) {
   const reset = (formData: FormData) => {
     formData.set("email", email);
     formData.set("emailcheck", emailcheck);
+
     formAction(formData);
   };
 

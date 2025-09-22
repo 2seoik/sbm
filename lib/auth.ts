@@ -53,7 +53,7 @@ export const {
       const { email, name: nickname, image } = user;
       if (!email) return false;
 
-      const mbr = await findMemberByEmail(email, isCredential);
+      let mbr = await findMemberByEmail(email, isCredential);
       //prisma.member.findUnique({ where: { email } });
 
       if (isCredential) {
@@ -71,16 +71,21 @@ export const {
           throw authError("비밀번호가 일치하지 않습니다!", "CredentialsSignin");
 
         // 이메일 승인 받지 않은상태에서 로그인 했을경우 이메일체크 다시 보내기
-        if (mbr?.emailcheck) {
+        if (mbr?.emailcheck)
           return `/sign/error?error=CheckEmail&email=${email}&emailcheck=${mbr.emailcheck}`;
-        }
       } else {
-        if (!mbr && nickname) {
-          await prisma.member.create({
-            data: { email, nickname, image },
+        if (!mbr) {
+          mbr = await prisma.member.create({
+            data: { email, nickname: nickname || "guest", image },
           });
         }
       }
+
+      user.id = String(mbr.id);
+      user.name = mbr.nickname;
+      if (mbr.image) user.image = mbr.image;
+      user.isadmin = mbr.isadmin;
+
       return true;
     },
     // jwt 방식, GET /api/auth/callback/google에는 user없음!
@@ -103,13 +108,13 @@ export const {
         token.image = userData.image;
         token.isadmin = userData.isadmin;
 
-        if (account) {
-          console.log("🚀 ~ account ======>", token.accessToken);
-          token.accessToken = account?.access_token;
-          token.accessTokenExpires =
-            Date.now() + (account.expires_in ?? 0) * 1000;
-          token.refreshToken = account.refresh_token;
-        }
+        // if (account) {
+        //   console.log("🚀 ~ account ======>", token.accessToken);
+        //   token.accessToken = account?.access_token; // <- id_token
+        //   token.accessTokenExpires =
+        //     Date.now() + (account.expires_in ?? 0) * 1000;
+        //   token.refreshToken = account.refresh_token;
+        // }
       }
 
       return token;

@@ -17,7 +17,7 @@ export default function Nav() {
         // 'session.user?.name
         <Link href="/my" className="overflow-hidden rounded-full border">
           <Image
-            src={DummyProfiie}
+            src={session.user?.image || DummyProfiie}
             alt={session.user?.name || "guest"}
             width={40}
             height={40}

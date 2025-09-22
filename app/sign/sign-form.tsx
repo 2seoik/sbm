@@ -22,27 +22,48 @@ export default function SignForm() {
   );
 }
 
+const readEmail = () => localStorage.getItem("SBM_LOCAL_EMAIL");
+
+const storeEmail = (email: string | null) => {
+  console.log(email);
+  email === null
+    ? localStorage.removeItem("SBM_LOCAL_EMAIL")
+    : localStorage.setItem("SBM_LOCAL_EMAIL", email);
+};
+
 function SignIn({ toggleSign }: { toggleSign: () => void }) {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const redirectTo = searchParams.get("redirectTo");
 
   const passwdRef = useRef<HTMLInputElement>(null);
+  const rememberRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   const [validError, makeLogin, isPending] = useActionState(
     authorize,
     undefined
   );
 
+  const remeberMe = () => {
+    if (rememberRef.current?.checked && emailRef.current?.value)
+      storeEmail(emailRef.current.value);
+    else storeEmail(null);
+  };
+
   const makeLoginAction = (formData: FormData) => {
+    remeberMe();
+
     if (redirectTo) formData.set("redirectTo", redirectTo);
     makeLogin(formData);
   };
 
   useEffect(() => {
-    if (email) {
-      passwdRef.current?.focus();
-    }
+    const storedEmail = readEmail();
+    if (rememberRef.current) rememberRef.current.checked = !!storedEmail;
+    if (emailRef.current && storedEmail) emailRef.current.value = storedEmail;
+
+    if (email || storedEmail) passwdRef.current?.focus;
   }, [email]);
 
   return (
@@ -57,6 +78,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           name="email"
           type="email"
           error={validError}
+          ref={emailRef}
           focus={true}
           defaultValue={email || ""}
           // defaultValue={"jeonseongho@naver.com"}
@@ -76,7 +98,8 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
             <input
               type="checkbox"
               id="remember"
-              defaultChecked={true}
+              ref={rememberRef}
+              onChange={remeberMe}
               className="mr-1 translate-y-[1px]"
             />
             Remember me

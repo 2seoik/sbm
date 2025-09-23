@@ -59,7 +59,7 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
 
   return (
     <form onSubmit={submitHandler} ref={formRef} className="w-full">
-      {/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: 무슨오류인지 확인 */}
       <div
         onDragOver={(e) => {
           e.preventDefault();

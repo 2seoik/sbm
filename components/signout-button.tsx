@@ -14,7 +14,7 @@ export default function SignOutButton({ name }: { name: string }) {
     <form action={logout}>
       <Button variant={"success"}>
         <LogOutIcon />
-        로그아웃 {name}
+        로그아웃
       </Button>
     </form>
   );

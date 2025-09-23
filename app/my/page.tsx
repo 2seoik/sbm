@@ -1,4 +1,4 @@
-import { ArchiveXIcon } from "lucide-react";
+import { Trash2Icon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { use } from "react";
 import ImageUploader from "@/components/image-uploader";
@@ -33,8 +33,8 @@ export default function My() {
             <div>
               <SignOutButton name={session.user.name} />
               <Button variant={"destructive"} className="mt-3 w-full">
-                <ArchiveXIcon />
-                북마크 삭제
+                <Trash2Icon />
+                탈퇴
               </Button>
             </div>
           </div>

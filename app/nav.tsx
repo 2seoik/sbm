@@ -4,6 +4,7 @@ import Link from "next/link";
 import { use } from "react";
 import { auth } from "@/lib/auth";
 import DummyProfiie from "@/public/profile_dummy.png";
+
 export default function Nav() {
   const session = use(auth());
   const didLogin = !!session?.user;

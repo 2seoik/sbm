@@ -121,8 +121,6 @@ export const {
     },
 
     async session({ session, token }) {
-      console.log("🚀 ~ session token:", token);
-      console.log("🚀 ~ session session:", session);
       if (token) {
         session.user.id = token.id?.toString() || "";
         session.user.name = token.name;

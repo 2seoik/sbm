@@ -54,7 +54,7 @@ export default async function RootLayout({
                 <Nav />
               </header>
               <main className="flex-1"> {children}</main>
-              <footer>
+              <footer className="mb-1">
                 <div className="flex justify-between">
                   <div className="text-zinc-500">&#169; shlee 2025</div>
                   <div>

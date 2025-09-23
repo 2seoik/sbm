@@ -10,7 +10,8 @@ type Props = {
 
 const getMessage = (err: string) => {
   if (err === "InvalidEmailCheck") return "유효하지 않은 이메일 인증키 입니다.";
-  if (err === "CheckEmail") return "이메일을 확인해주세요.";
+  if (err === "CheckEmail")
+    return "이메일을 발송했습니다. 이메일을 확인 해주세요.";
   if (err === "EmailSendFail") return "Cannot send email!";
 };
 

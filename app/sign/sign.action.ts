@@ -71,7 +71,7 @@ export const authorize = async (
   }
 };
 
-// 회원가입
+// credential 회원가입
 export const regist = async (
   _pre: ValidError | undefined,
   formData: FormData

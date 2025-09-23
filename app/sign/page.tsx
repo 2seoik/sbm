@@ -47,9 +47,9 @@ export default function Sign({ searchParams }: Props) {
               </div>
             </div>
             <div className="mt-5 space-y-3">
-              <SoMany images={BookImages} />
-              <SoMany images={MarkImages} />
-              <SoMany images={PeopleImages} />
+              <SoMany images={BookImages} cnt={"50k"} label={"Books"} />
+              <SoMany images={MarkImages} cnt={"500k"} label={"Marks"} />
+              <SoMany images={PeopleImages} cnt={"500k"} label={"Users"} />
             </div>
           </div>
         </div>

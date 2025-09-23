@@ -90,11 +90,11 @@ export const {
     },
     // jwt 방식, GET /api/auth/callback/google에는 user없음!
     async jwt({ token, user, trigger, account, session }) {
-      console.log("🚀 ~jwt session:", session);
-      console.log("🚀 ~jwt account:", account);
-      console.log("🚀 ~jwt trigger:", trigger);
-      console.log("🚀 ~jwt user:", user);
-      console.log("🚀 ~jwt token:", token);
+      // console.log("🚀 ~jwt session:", session);
+      // console.log("🚀 ~jwt account:", account);
+      // console.log("🚀 ~jwt trigger:", trigger);
+      // console.log("🚀 ~jwt user:", user);
+      // console.log("🚀 ~jwt token:", token);
       // console.log("🚀 ~ account:", account);
 
       // token 갱신 "signIn" | "signUp" | "update"

@@ -1,12 +1,15 @@
 "use server";
 
 import { hash } from "bcryptjs";
+import { existsSync, mkdirSync } from "fs";
+import { writeFile } from "fs/promises";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
+import path from "path";
 import z from "zod";
-import { signIn, signOut } from "@/lib/auth";
+import { auth, signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { newToken } from "@/lib/utils";
+import { newToken, uniqId } from "@/lib/utils";
 import { type ValidError, validate } from "@/lib/validator";
 import type { SendMailBody } from "../api/sendmail/route";
 
@@ -287,4 +290,43 @@ const sendMailByFetch = async ({
     },
     body: JSON.stringify({ email, emailcheck, nickname, emailType }),
   });
+};
+
+export const updateProfileImage = async (formData: FormData) => {
+  const session = await auth(); // use(auth());
+
+  if (!session?.user || !session.user.email)
+    throw new Error("로그인이 필요합니다.");
+
+  const { email, id } = session.user;
+
+  const zobj = z.object({
+    image: z
+      .instanceof(File)
+      .refine((file) => file.size <= 10 * 1024 * 1024, "Under 10MB!")
+      .refine((file) => file.type.startsWith("image/"), "Upload Image only!"),
+  });
+
+  const [err, data] = validate(zobj, formData);
+  if (err) return [err];
+
+  // os 별 path 관리
+  const uploadDir = path.join(process.cwd(), "public", "profiles");
+  // uploadDir이 존재하지 않는다면 생성
+  if (!existsSync(uploadDir)) mkdirSync(uploadDir);
+
+  // const file = formData.get("image") as File;
+  const fileName = `${id}_${uniqId()}${data.image.name}`;
+  const filePath = path.join(uploadDir, fileName);
+
+  const buffer = Buffer.from(await data.image.arrayBuffer());
+  await writeFile(filePath, buffer);
+  const image = `/profiles/${fileName}`;
+
+  const mbr = await prisma.member.update({
+    where: { email },
+    data: { image },
+  });
+
+  return [null, mbr];
 };

@@ -1,7 +1,11 @@
 import Img from "@/components/ui/img";
 
-type Props = { images: { src: string; alt: string }[] };
-export default function SoMany({ images }: Props) {
+type Props = {
+  images: { src: string; alt: string }[];
+  cnt: string;
+  label: string;
+};
+export default function SoMany({ images, cnt, label }: Props) {
   return (
     <div className="flex">
       <div className="flex flex-1 items-center">
@@ -20,7 +24,7 @@ export default function SoMany({ images }: Props) {
         ))}
       </div>
       <div className="flex flex-1 items-center justify-end border-l-1 pr-2">
-        <strong>500K</strong> Books
+        <strong>{cnt}</strong> {label}
       </div>
     </div>
   );

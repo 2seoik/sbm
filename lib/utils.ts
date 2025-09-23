@@ -4,6 +4,16 @@ import { v4 as uuid } from "uuid";
 
 export const newToken = () => uuid();
 
+export const uniqNumId = (cnt = 5) =>
+  Math.random()
+    .toString(10)
+    .substring(2, cnt + 2);
+
+export const uniqId = (cnt = 5) =>
+  Math.random()
+    .toString(36)
+    .substring(2, cnt + 2);
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

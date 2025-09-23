@@ -17,7 +17,7 @@ type Props = {
   name?: string;
   error?: ValidError;
   focus?: boolean;
-  defaultValue?: string | number;
+  defaultValue?: string | number | null;
   placeholder?: string;
   className?: string;
   inputClassName?: string;
@@ -62,7 +62,7 @@ export default function LabelInput({
           name={name || uniqueName}
           ref={ref || inpRef}
           placeholder={placeholder || ""}
-          defaultValue={val || defaultValue}
+          defaultValue={val || defaultValue || ""}
           className={cn(
             "bg-gray-100 font-normal focus:bg-white",
             inputClassName

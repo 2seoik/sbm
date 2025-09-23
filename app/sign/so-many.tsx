@@ -13,7 +13,9 @@ export default function SoMany({ images }: Props) {
             alt={alt}
             width={40}
             height={40}
-            className={`translate-x-[${-20 * idx}px] rounded-full border`}
+            className={`translate-x-[${
+              -20 * idx
+            }px] rounded-full border bg-white`}
           />
         ))}
       </div>

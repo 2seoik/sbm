@@ -38,10 +38,9 @@ export default function ForgotPasswd() {
             className="mt-5 w-full"
             disabled={isPending}
           >
-            <LoadingIcon
-              isPending={isPending}
-              text={"Send Instructions Email"}
-            />
+            <LoadingIcon isPending={isPending}>
+              Send Instructions Email
+            </LoadingIcon>
           </Button>
         </form>
         <div className="mt-5 text-center">

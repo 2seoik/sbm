@@ -28,8 +28,8 @@ export default function ThemeChanger() {
           onClick={() => setTheme(themeKey)}
           className={`m-1.5 cursor-pointer items-center justify-center gap-2 rounded-full px-1.5 py-1.5 font-medium text-sm transition-colors ${
             theme === themeKey
-              ? "bg-primary text-primary-foreground" // 선택됨
-              : "hover:bg-foreground/10" // 선택 안됨
+              ? "bg-primary text-primary-foreground"
+              : "hover:bg-foreground/10"
           }`}
         >
           {themeIcon}

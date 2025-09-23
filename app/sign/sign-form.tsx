@@ -112,7 +112,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           className="w-full"
           disabled={isPending}
         >
-          <LoadingIcon isPending={isPending} text={"Sign In"} />
+          <LoadingIcon isPending={isPending}>Sign In</LoadingIcon>
         </Button>
       </form>
       <div className="mt-5 flex gap-10">
@@ -182,7 +182,7 @@ function SignUp({ toggleSign }: { toggleSign: () => void }) {
           className="w-full"
           disabled={isPending}
         >
-          <LoadingIcon isPending={isPending} text={"Sign Up"} />
+          <LoadingIcon isPending={isPending}>Sign Up</LoadingIcon>
         </Button>
       </form>
       <div className="mt-5 flex gap-10">

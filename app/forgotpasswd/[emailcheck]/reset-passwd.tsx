@@ -46,7 +46,7 @@ export default function ResetPassword({ email, emailcheck }: Props) {
         className="mt-5 w-full"
         disabled={isPending}
       >
-        <LoadingIcon isPending={isPending} text={"Change password"} />
+        <LoadingIcon isPending={isPending}>Change password</LoadingIcon>
       </Button>
     </form>
   );

@@ -88,8 +88,8 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
           onClick={() => fileRef.current?.click()}
           className="rounded-full border"
           fill
+          unoptimized={true}
         />
-        <p>{img}</p>
         <input
           type="file"
           name="image"

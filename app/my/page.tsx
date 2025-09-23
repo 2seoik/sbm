@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import DummyProfile from "@/public/profile_dummy.png";
 import { updateProfileImage } from "../sign/sign.action";
-import ChageProfile from "./change-frofile";
+import ChageProfile from "./change-profile";
 
 export default function My() {
   const session = use(auth());

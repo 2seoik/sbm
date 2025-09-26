@@ -1,5 +1,5 @@
 "use client";
-import Image, { type StaticImageData } from "next/image";
+import type { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -9,6 +9,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import ProfileImage from "@/app/my/profile-image";
 import type { UpdateProfileImageReturn } from "@/app/sign/sign.action";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +71,10 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
       router.refresh();
     });
   };
+
+  // useEffect(() => {
+  //   console.log("src", src);
+  // });
   return (
     <form onSubmit={submitHandler} ref={formRef} className="w-full">
       {/** biome-ignore lint/a11y/noStaticElementInteractions: file attach */}
@@ -97,11 +102,12 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
           { "border-blue-500 border-dotted": isDragging }
         )}
       >
-        <Image
+        <ProfileImage
           src={img}
           alt={alt || ""}
           onClick={() => fileRef.current?.click()}
           className="rounded-full border"
+          // onError={() => setImg("/profile_dummy.png")}
           fill
           unoptimized={process.env.NODE_ENV === "development"}
         />

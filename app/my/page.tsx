@@ -29,7 +29,6 @@ export default function My() {
               alt={name}
               changeImage={updateProfileImage}
             />
-            {/* <Img src={image || DummyProfile} /> */}
             <div>
               <SignOutButton name={name} />
               <Button variant={"destructive"} className="mt-3 w-full">

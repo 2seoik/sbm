@@ -6,8 +6,7 @@ import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 import Naver from "next-auth/providers/naver";
 import z from "zod";
-import { findMemberByEmail } from "@/app/sign/sign.action";
-import prisma from "./db";
+import prisma, { findMemberByEmail } from "./db";
 import { validateObject } from "./validator";
 
 export const {
@@ -89,7 +88,7 @@ export const {
       return true;
     },
     // jwt 방식, GET /api/auth/callback/google에는 user없음!
-    async jwt({ token, user, trigger, account, session }) {
+    async jwt({ token, user, trigger, session }) {
       // console.log("🚀 ~jwt session:", session);
       // console.log("🚀 ~jwt account:", account);
       // console.log("🚀 ~jwt trigger:", trigger);
@@ -116,7 +115,6 @@ export const {
         //   token.refreshToken = account.refresh_token;
         // }
       }
-
       return token;
     },
 

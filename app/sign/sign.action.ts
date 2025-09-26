@@ -3,12 +3,13 @@
 import { hash } from "bcryptjs";
 import { existsSync, mkdirSync } from "fs";
 import { writeFile } from "fs/promises";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import path from "path";
 import z from "zod";
 import { auth, signIn, signOut } from "@/lib/auth";
-import prisma from "@/lib/db";
+import prisma, { findMemberByEmail } from "@/lib/db";
 import { newToken, uniqId } from "@/lib/utils";
 import { type ValidError, validate } from "@/lib/validator";
 import type { SendMailBody } from "../api/sendmail/route";
@@ -256,24 +257,6 @@ export const resetPassword = async (
   redirect(`/sign?email=${email}`);
 };
 
-// 이메일로 회원찾기
-export const findMemberByEmail = async (
-  email: string,
-  passwd: boolean = false
-) =>
-  prisma.member.findUnique({
-    select: {
-      id: true,
-      nickname: true,
-      isadmin: true,
-      image: true,
-      emailcheck: true,
-      outdt: true,
-      passwd,
-    },
-    where: { email },
-  });
-
 // 메일 보내기
 const sendMailByFetch = async ({
   email,
@@ -292,9 +275,10 @@ const sendMailByFetch = async ({
   });
 };
 
+export type UpdateProfileImageReturn = ReturnType<typeof updateProfileImage>;
+
 export const updateProfileImage = async (formData: FormData) => {
   const session = await auth(); // use(auth());
-
   if (!session?.user || !session.user.email)
     throw new Error("로그인이 필요합니다.");
 
@@ -327,6 +311,8 @@ export const updateProfileImage = async (formData: FormData) => {
     where: { email },
     data: { image },
   });
+
+  revalidatePath("/profiles");
 
   return [null, mbr];
 };

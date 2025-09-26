@@ -15,7 +15,7 @@ export default function My() {
   // const { data, update } = useSession();
   // const updateInfo = async (formData: FormData) => {};
 
-  const { name, email, image } = session.user;
+  const { name, image } = session.user;
 
   return (
     <div className="grid h-full place-items-center">
@@ -31,7 +31,7 @@ export default function My() {
             />
             {/* <Img src={image || DummyProfile} /> */}
             <div>
-              <SignOutButton name={session.user.name} />
+              <SignOutButton name={name} />
               <Button variant={"destructive"} className="mt-3 w-full">
                 <Trash2Icon />
                 탈퇴

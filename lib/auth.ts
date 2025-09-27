@@ -1,4 +1,3 @@
-import { compare } from "bcryptjs";
 import NextAuth, { AuthError } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
@@ -7,7 +6,7 @@ import Kakao from "next-auth/providers/kakao";
 import Naver from "next-auth/providers/naver";
 import z from "zod";
 import prisma, { findMemberByEmail } from "./db";
-import { validateObject } from "./validator";
+import { comparePassword, validateObject } from "./validator";
 
 export const {
   handlers: { GET, POST },
@@ -65,8 +64,8 @@ export const {
             "OAuthAccountNotLinked"
           );
 
-        const isValiedPasswd = await compare(user.passwd ?? "", mbr.passwd);
-        if (!isValiedPasswd)
+        const isValidPasswd = await comparePassword(user.passwd, mbr.passwd);
+        if (!isValidPasswd)
           throw authError("비밀번호가 일치하지 않습니다!", "CredentialsSignin");
 
         // 이메일 승인 받지 않은상태에서 로그인 했을경우 이메일체크 다시 보내기

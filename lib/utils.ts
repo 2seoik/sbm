@@ -2,6 +2,8 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { v4 as uuid } from "uuid";
 
+export { default as DummyProfiie } from "@/public/profile_dummy.png";
+
 export const newToken = () => uuid();
 
 export const uniqNumId = (cnt = 5) =>

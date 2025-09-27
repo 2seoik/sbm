@@ -13,7 +13,8 @@ type Props = {
   } & User;
 };
 export default function ChageProfile({ user }: Props) {
-  const { update } = useSession({ required: true });
+  // const { update } = useSession({ required: true }); // 로그인필수 (클라이언트) revalidate, refresh 사용함... 유의해서 사용
+  const { update } = useSession();
   const [diffEmail, setDiffEmail] = useState(false);
 
   return (

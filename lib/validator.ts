@@ -1,3 +1,6 @@
+import { compare } from "bcryptjs";
+import { existsSync } from "fs";
+import path from "path";
 import z from "zod";
 
 // export type ValidError = {
@@ -36,4 +39,13 @@ export const validateObject = <T extends z.ZodObject>(
   } else {
     return [undefined, validator.data];
   }
+};
+
+export const comparePassword = (p1: string | undefined, p2: string) =>
+  compare(p1 || "", p2);
+
+export const existsFile = (filePath: string | undefined | null) => {
+  if (!filePath) return filePath;
+  const fullPath = path.join(process.cwd(), "public", filePath);
+  return existsSync(fullPath) ? filePath : null;
 };

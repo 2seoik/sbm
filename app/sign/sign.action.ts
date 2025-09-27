@@ -10,8 +10,13 @@ import path from "path";
 import z from "zod";
 import { auth, signIn, signOut } from "@/lib/auth";
 import prisma, { findMemberByEmail } from "@/lib/db";
-import { newToken, uniqId } from "@/lib/utils";
-import { type ValidError, validate } from "@/lib/validator";
+import { newToken, uniqId, uniqNumId } from "@/lib/utils";
+import {
+  comparePassword,
+  existsEmail,
+  type ValidError,
+  validate,
+} from "@/lib/validator";
 import type { SendMailBody } from "../api/sendmail/route";
 
 export type Provider = "google" | "github" | "naver" | "kakao";
@@ -97,11 +102,8 @@ export const regist = async (
 
   const { email, nickname, passwd: orgPasswd } = data;
 
-  const mbr = await findMemberByEmail(email);
-  if (mbr)
-    return {
-      email: { errors: ["이미 존재하는 이메일입니다."], value: email },
-    } as ValidError;
+  const existsErr = existsEmail(email);
+  if (existsErr) return existsErr;
 
   const passwd = await hash(orgPasswd, 10);
   const emailcheck = newToken();
@@ -273,6 +275,92 @@ const sendMailByFetch = async ({
     },
     body: JSON.stringify({ email, emailcheck, nickname, emailType }),
   });
+};
+
+export const sendEmailChangeCode = async (formData: FormData) => {
+  const session = await auth(); // use(auth());
+  if (!session?.user || !session.user.email)
+    throw new Error("로그인이 필요합니다.");
+
+  const { email } = session.user;
+  const mbr = await findMemberByEmail(email);
+
+  const zobj = z.object({
+    nickname: z.string().min(3),
+    newEmail: z.email(),
+    curr_passwd: z.string().optional(),
+    passwd: z.string().optional(),
+    passwd2: z.string().optional(),
+  });
+  // .refine(
+  //   ({ curr_passwd, passwd, passwd2 }) => {
+  //     return (
+  //       (!curr_passwd && !passwd && !passwd2) ||
+  //       (curr_passwd && passwd && passwd2)
+  //     );
+  //   },
+  //   { path: ["passwd2"], message: "Input the all password to change!" }
+  // )
+  // .refine(({ curr_passwd, passwd, passwd2 }) => {
+  //   if (curr_passwd && passwd && passwd2 && mbr?.passwd) {
+  //     return passwd === passwd2;
+  //   }
+  //   return true;
+  // });
+
+  const [err, data] = validate(zobj, formData);
+  console.log("🚀 ~ sign.action.ts ~ err:", err);
+  if (err) return err;
+
+  const dataErr: ValidError = {};
+  for (const [key, value] of Object.entries(data)) {
+    dataErr[key] = { errors: [], value };
+  }
+
+  const { newEmail, nickname, curr_passwd } = data;
+
+  if (mbr?.passwd && curr_passwd) {
+    const validCurrPasswd = await comparePassword(mbr?.passwd, curr_passwd);
+    if (validCurrPasswd) {
+      return {
+        ...dataErr,
+        curr_passwd: { errors: ["비밀번호가 맞지않음"], value: curr_passwd },
+      };
+    }
+  }
+
+  const existsErr = await existsEmail(newEmail, "newEmail");
+  if (existsErr) return { ...dataErr, ...existsErr };
+
+  const emailcheck = uniqNumId();
+  await prisma.member.update({
+    where: {
+      email,
+    },
+    data: {
+      emailcheck,
+    },
+  });
+
+  setTimeout(async () => {
+    await prisma.member.update({
+      where: {
+        email,
+      },
+      data: {
+        emailcheck: null,
+      },
+    });
+  }, 5000); //2 * 60 * 1000);
+
+  await sendMailByFetch({
+    email,
+    emailcheck,
+    nickname,
+    emailType: "emailChangeCode",
+  });
+
+  return dataErr;
 };
 
 export type UpdateProfileImageReturn = ReturnType<typeof updateProfileImage>;

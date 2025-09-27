@@ -1,11 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { sendPasswordReset, sendRegistCheck } from "@/app/sign/mail.actions";
+import {
+  sendEmailChangeCode,
+  sendPasswordReset,
+  sendRegistCheck,
+} from "@/app/sign/mail.actions";
 
 export type SendMailBody = {
   email: string;
   emailcheck: string;
   nickname?: string;
-  emailType?: "regist" | "resetPassword";
+  emailType?: "regist" | "resetPassword" | "emailChangeCode";
 };
 
 // api/sendmail
@@ -24,7 +28,8 @@ export async function POST(req: NextRequest) {
   const rs =
     emailType === "regist"
       ? await sendRegistCheck(email, emailcheck)
-      : await sendPasswordReset(email, emailcheck, nickname);
-
+      : emailType === "resetPassword"
+      ? await sendPasswordReset(email, emailcheck, nickname)
+      : await sendEmailChangeCode(email, emailcheck, nickname);
   return NextResponse.json(rs);
 }

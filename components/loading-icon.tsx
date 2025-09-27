@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/complexity/noUselessFragments: <explanation> */
 import { Loader2Icon } from "lucide-react";
 import type { PropsWithChildren } from "react";
 

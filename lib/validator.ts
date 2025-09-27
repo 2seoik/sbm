@@ -2,6 +2,7 @@ import { compare } from "bcryptjs";
 import { existsSync } from "fs";
 import path from "path";
 import z from "zod";
+import { findMemberByEmail } from "./db";
 
 // export type ValidError = {
 //   [k: string]: {
@@ -48,4 +49,12 @@ export const existsFile = (filePath: string | undefined | null) => {
   if (!filePath) return filePath;
   const fullPath = path.join(process.cwd(), "public", filePath);
   return existsSync(fullPath) ? filePath : null;
+};
+
+export const existsEmail = async (email: string, prop: string = "eamil") => {
+  const mbr = await findMemberByEmail(email);
+  if (mbr)
+    return {
+      [prop]: { errors: ["이미 존재하는 이메일입니다."], value: email },
+    };
 };

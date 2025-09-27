@@ -66,3 +66,24 @@ export const sendPasswordReset = async (
 
   return sendMail(to, subject, html);
 };
+
+export const sendEmailChangeCode = async (
+  to: string,
+  authKey: string,
+  nickname?: string
+) => {
+  console.log("🚀 ~ to:", to);
+  const subject = "[Bookmark] Email Change";
+  const html = `
+    <div style="display: grid; place-items: center; height: 200px;">
+      <h1>Email Change</h1>
+      <h2>Hello, ${nickname}</h2>
+      <h3 style="margin: 10px 0;">
+        Click the link below to reset your password.
+      </h3>
+      <h1> style=""${authKey}</h1>
+    </div>
+  `;
+
+  return sendMail(to, subject, html);
+};

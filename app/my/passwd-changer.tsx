@@ -1,41 +1,30 @@
+"use client";
 import { CheckLineIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { type FormEvent, useRef, useState, useTransition } from "react";
+import { useActionState } from "react";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
 import type { ValidError } from "@/lib/validator";
-import { passwdChange } from "./my.actions";
+import { passwdChange2 } from "./my.actions";
 
 export default function PasswordChanger() {
   const router = useRouter();
   const { update } = useSession();
 
-  const formRef = useRef<HTMLFormElement>(null);
-  const [validError, setValidError] = useState<ValidError>();
-  const [isPending, startTransition] = useTransition();
-
-  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    // console.log(Object.fromEntries(formData.entries()));
-
-    startTransition(async () => {
-      // server
-      const [err, mbr] = await passwdChange(formData);
-      if (err) {
-        setValidError(err);
-      }
-
+  const [validError, formAction, isPending] = useActionState(
+    async (_prev: ValidError | undefined, formData: FormData) => {
+      const [err, mbr] = await passwdChange2(formData);
+      if (err) return err;
       await update(mbr);
-      // router.refresh(); // 안쓰는 것이 좋음.
-      router.replace("/my");
-    });
-  };
+      router.refresh();
+    },
+    undefined
+  );
 
   return (
     <div className="rounded-md border-2 border-blue-300 p-2">
-      <form onSubmit={submitHandler} ref={formRef}>
+      <form action={formAction}>
         <LabelInput
           label="Current Password"
           type="password"

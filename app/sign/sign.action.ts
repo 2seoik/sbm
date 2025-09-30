@@ -469,12 +469,13 @@ export const sendEmailChangeCode = async (formData: FormData) => {
     });
   }, 2 * 60 * 1000);
 
-  await sendMailByFetch({
-    email,
-    emailcheck,
-    nickname: name || "",
-    emailType: "emailChangeCode",
-  });
+  // TODO : 임시 주석
+  // await sendMailByFetch({
+  //   email,
+  //   emailcheck,
+  //   nickname: name || "",
+  //   emailType: "emailChangeCode",
+  // });
 };
 
 export const updateEmail = async (formData: FormData) => {

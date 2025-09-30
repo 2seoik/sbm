@@ -106,25 +106,19 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
           onChange={(e) => setDiffEmail(e.target.value !== email)}
         />
         {diffEmail && (
-          <div
-            className={cn(
-              {
-                "items-center": !didSendCode && !!validError,
-                "items-end": !didSendCode && !validError,
-              },
-              "flex"
-            )}
-          >
+          <div className={cn()}>
             <Button onClick={sendmail} variant={"success"} disabled={isSending}>
-              {didSendCode ? "Resend" : "Send"} Verify Code
+              인증메일 {didSendCode ? "재전송" : "전송"}
             </Button>
           </div>
         )}
       </form>
       {didSendCode && (
-        <div className="flex items-center gap-3">
+        // 인증코드 관련 error 있으면 center
+        // 없으면 end
+        <div className={cn()}>
           <LabelInput
-            label="Email Cahnge Code (2분)"
+            label="Email Change Code (2분)"
             type="text"
             name="emailChangeCode"
             placeholder="input Ccde..."
@@ -136,7 +130,7 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
             variant={"primary"}
             disabled={isSending}
           >
-            Confirm Code & Save
+            인증코드 확인 & 저장
           </Button>
         </div>
       )}

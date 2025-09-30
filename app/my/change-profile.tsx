@@ -1,15 +1,14 @@
 "use client";
 
-import { CheckLineIcon, Undo2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useReducer } from "react";
 import LabelEdit from "@/components/label-edit";
-import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
 import { updateNickName } from "../sign/sign.action";
 import EmailChanger from "./email-changer";
+import PasswordChanger from "./passwd-changer";
 
 type Props = {
   user: {
@@ -52,32 +51,7 @@ export default function ChageProfile({ user }: Props) {
         </Button>
       )}
 
-      <LabelInput
-        label="Current Password"
-        type="password"
-        name="curr_passwd"
-        placeholder="Current Password..."
-      />
-      <LabelInput
-        label="New Password"
-        type="password"
-        name="passwd"
-        placeholder="New Password..."
-      />
-      <LabelInput
-        label="New Password Confirm"
-        type="password"
-        name="passwd2"
-        placeholder="New Current Password..."
-      />
-      <div className="flex justify-center gap-5">
-        <Button type="reset" variant={"outline"}>
-          <Undo2Icon /> Cancel
-        </Button>
-        <Button type="submit" variant={"primary"}>
-          <CheckLineIcon /> Save
-        </Button>
-      </div>
+      <PasswordChanger />
     </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import { CheckLineIcon, Undo2Icon } from "lucide-react";
 import type { User } from "next-auth";
-import { useSession } from "next-auth/react";
 import { useActionState, useReducer, useState } from "react";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,7 @@ type Props = {
 };
 export default function ChageProfile({ user }: Props) {
   // const { update } = useSession({ required: true }); // 로그인필수 (클라이언트) revalidate, refresh 사용함... 유의해서 사용
-  const { update } = useSession();
+  // const { update } = useSession();
   const [diffEmail, setDiffEmail] = useState(false);
   const [didSendCode, toggleSendCode] = useReducer((pre) => !pre, false);
 

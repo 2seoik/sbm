@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { ValidError } from "@/lib/validator";
 import { Input } from "./ui/input";
 
-type Props = {
+export type LabelInputProps = {
   label: string;
   type?: string;
   name?: string;
@@ -35,7 +35,7 @@ export default function LabelInput({
   inputClassName,
   ref,
   ...props
-}: Props & ComponentProps<"input">) {
+}: LabelInputProps & ComponentProps<"input">) {
   const uniqueName = useId();
   const inpRef = useRef<HTMLInputElement>(null);
   const err = !!error && !!name && error[name] ? error[name].errors : [];

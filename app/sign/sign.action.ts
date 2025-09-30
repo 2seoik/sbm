@@ -277,7 +277,73 @@ const sendMailByFetch = async ({
   });
 };
 
-export const sendEmailChangeCode = async (formData: FormData) => {
+export type UpdateProfileImageReturn = ReturnType<typeof updateProfileImage>;
+
+export const updateProfileImage = async (formData: FormData) => {
+  const session = await auth(); // use(auth());
+  if (!session?.user || !session.user.email)
+    throw new Error("로그인이 필요합니다.");
+
+  const { email, id } = session.user;
+
+  const zobj = z.object({
+    image: z
+      .instanceof(File)
+      .refine((file) => file.size <= 10 * 1024 * 1024, "Under 10MB!")
+      .refine((file) => file.type.startsWith("image/"), "Upload Image only!"),
+  });
+
+  const [err, data] = validate(zobj, formData);
+  if (err) return [err];
+
+  // os 별 path 관리
+  const uploadDir = path.join(process.cwd(), "public", "profiles");
+  // uploadDir이 존재하지 않는다면 생성
+  if (!existsSync(uploadDir)) mkdirSync(uploadDir);
+
+  // const file = formData.get("image") as File;
+  const fileName = `${id}_${uniqId()}${data.image.name}`;
+  const filePath = path.join(uploadDir, fileName);
+
+  const buffer = Buffer.from(await data.image.arrayBuffer());
+  await writeFile(filePath, buffer);
+  const image = `/profiles/${fileName}`;
+
+  const mbr = await prisma.member.update({
+    where: { email },
+    data: { image },
+  });
+
+  revalidatePath("/profiles");
+
+  return [null, mbr];
+};
+
+export type updateMemberReturnType = ReturnType<typeof updateNickName>;
+
+export const updateNickName = async (formData: FormData) => {
+  const session = await auth(); // use(auth());
+  if (!session?.user || !session.user.email)
+    throw new Error("로그인이 필요합니다.");
+
+  const { email } = session.user;
+  const zobj = z.object({
+    nickname: z.string().min(4),
+  });
+
+  const [err, data] = validate(zobj, formData);
+  if (err) return [err, null] as const;
+
+  const { nickname } = data;
+  const mbr = await prisma.member.update({
+    where: { email },
+    data: { nickname },
+  });
+
+  return [null, mbr] as const;
+};
+
+export const sendEmailChangeCode_일괄저장 = async (formData: FormData) => {
   const session = await auth(); // use(auth());
   if (!session?.user || !session.user.email)
     throw new Error("로그인이 필요합니다.");
@@ -351,7 +417,7 @@ export const sendEmailChangeCode = async (formData: FormData) => {
         emailcheck: null,
       },
     });
-  }, 5000); //2 * 60 * 1000);
+  }, 2 * 60 * 1000);
 
   await sendMailByFetch({
     email,
@@ -363,44 +429,96 @@ export const sendEmailChangeCode = async (formData: FormData) => {
   return dataErr;
 };
 
-export type UpdateProfileImageReturn = ReturnType<typeof updateProfileImage>;
-
-export const updateProfileImage = async (formData: FormData) => {
+export const sendEmailChangeCode = async (formData: FormData) => {
   const session = await auth(); // use(auth());
   if (!session?.user || !session.user.email)
     throw new Error("로그인이 필요합니다.");
 
-  const { email, id } = session.user;
+  const { email, name } = session.user;
+  const mbr = await findMemberByEmail(email);
 
   const zobj = z.object({
-    image: z
-      .instanceof(File)
-      .refine((file) => file.size <= 10 * 1024 * 1024, "Under 10MB!")
-      .refine((file) => file.type.startsWith("image/"), "Upload Image only!"),
+    newEmail: z.email(),
   });
 
   const [err, data] = validate(zobj, formData);
-  if (err) return [err];
+  if (err) return err;
 
-  // os 별 path 관리
-  const uploadDir = path.join(process.cwd(), "public", "profiles");
-  // uploadDir이 존재하지 않는다면 생성
-  if (!existsSync(uploadDir)) mkdirSync(uploadDir);
+  const { newEmail } = data;
+  const existsErr = await existsEmail(newEmail, "newEmail");
+  if (existsErr) return existsErr;
 
-  // const file = formData.get("image") as File;
-  const fileName = `${id}_${uniqId()}${data.image.name}`;
-  const filePath = path.join(uploadDir, fileName);
-
-  const buffer = Buffer.from(await data.image.arrayBuffer());
-  await writeFile(filePath, buffer);
-  const image = `/profiles/${fileName}`;
-
-  const mbr = await prisma.member.update({
-    where: { email },
-    data: { image },
+  const emailcheck = uniqNumId();
+  await prisma.member.update({
+    where: {
+      email,
+    },
+    data: {
+      emailcheck,
+    },
   });
 
-  revalidatePath("/profiles");
+  setTimeout(async () => {
+    await prisma.member.update({
+      where: {
+        email,
+      },
+      data: {
+        emailcheck: null,
+      },
+    });
+  }, 2 * 60 * 1000);
 
-  return [null, mbr];
+  await sendMailByFetch({
+    email,
+    emailcheck,
+    nickname: name || "",
+    emailType: "emailChangeCode",
+  });
+};
+
+export const updateEmail = async (formData: FormData) => {
+  const session = await auth(); // use(auth());
+  if (!session?.user || !session.user.email)
+    throw new Error("로그인이 필요합니다.");
+
+  console.log("****>>", Object.fromEntries(formData.entries()));
+
+  const { email } = session.user;
+  const mbr = await findMemberByEmail(email);
+  if (!mbr || !mbr.emailcheck || mbr.emailcheck.length !== 5) {
+    return [
+      {
+        emailChangeCode: {
+          errors: ["인증코드가 유효하지 않습니다."],
+        },
+      } as ValidError,
+      null,
+    ] as const;
+  }
+
+  const zobj = z.object({
+    newEmail: z.email(),
+    emailChangeCode: z.literal(mbr.emailcheck, "인증코드가 일치하지 않습니다."),
+  });
+
+  const [err, data] = validate(zobj, formData);
+  if (err) return [err, null] as const;
+
+  const { newEmail } = data;
+  const existsErr = await existsEmail(newEmail, "newEmail");
+  if (existsErr) return [existsErr, null] as const;
+
+  const newMbr = await prisma.member.update({
+    where: {
+      email: email,
+    },
+    data: {
+      email: newEmail,
+      emailcheck: null,
+    },
+  });
+  console.log("🚀 ~ sign.action.ts ~ newMbr:", newMbr);
+
+  return [null, newMbr] as const;
 };

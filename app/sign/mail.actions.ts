@@ -81,7 +81,7 @@ export const sendEmailChangeCode = async (
       <h3 style="margin: 10px 0;">
         Click the link below to reset your password.
       </h3>
-      <h1> style=""${authKey}</h1>
+      <h1> style="">${authKey}</h1>
     </div>
   `;
 

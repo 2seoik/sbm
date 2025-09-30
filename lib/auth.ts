@@ -98,7 +98,9 @@ export const {
       // token 갱신 "signIn" | "signUp" | "update"
       // update 일때만 session
       const userData = trigger === "update" ? session : user;
-
+      if (trigger === "update") {
+        console.log("🚀 ~ auth.ts ~ userData:", userData);
+      }
       if (userData) {
         token.id = userData.id;
         token.email = userData.email;

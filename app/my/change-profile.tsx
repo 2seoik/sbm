@@ -1,14 +1,15 @@
 "use client";
 
 import { CheckLineIcon, Undo2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
-import { useActionState, useReducer, useState } from "react";
+import { useReducer } from "react";
+import LabelEdit from "@/components/label-edit";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { ValidError } from "@/lib/validator";
-import { sendEmailChangeCode } from "../sign/sign.action";
+import { updateNickName } from "../sign/sign.action";
+import EmailChanger from "./email-changer";
 
 type Props = {
   user: {
@@ -17,71 +18,40 @@ type Props = {
 };
 export default function ChageProfile({ user }: Props) {
   // const { update } = useSession({ required: true }); // 로그인필수 (클라이언트) revalidate, refresh 사용함... 유의해서 사용
+  const router = useRouter();
   const { update } = useSession();
-  const [diffEmail, setDiffEmail] = useState(false);
-  const [didSendCode, toggleSendCode] = useReducer((pre) => !pre, true);
+  const [isEditingEmail, toggleEditingEmail] = useReducer((pre) => !pre, true); // TODO : false
 
-  const [emailError, sendEmailCode, isEmailPending] = useActionState(
-    async (_: ValidError | undefined, formData: FormData) => {
-      const err = await sendEmailChangeCode(formData);
-      if (err) return err;
-      toggleSendCode();
-      // await update(mbr);
-    },
-    undefined
-  );
+  const changeNickName = async (formData: FormData) => {
+    const ent = Object.fromEntries(formData.entries());
+    console.log("🚀 ~ change-profile.tsx ~ ent:", ent);
+    const [err, mbr] = await updateNickName(formData);
+    if (err) return err;
+    await update(mbr);
+    router.refresh(); // 안쓰는 것이 좋음.
+  };
+
   return (
-    <form action="" className="space-y-3 text-left">
-      <LabelInput
+    <div className="space-y-3 text-left">
+      <LabelEdit
         name="nickname"
         label="nickname"
-        error={emailError}
         defaultValue={user.name || ""}
+        saveAction={changeNickName}
       />
-      <div
-        className={cn(
-          {
-            "mt-5": didSendCode,
-            "mb-7": !didSendCode,
-          },
-          "flex items-end gap-2"
-        )}
-      >
-        <LabelInput
-          name="newEmail"
-          label="email"
-          error={emailError}
-          defaultValue={user.email || ""}
-          onChange={(e) => setDiffEmail(e.target.value !== user.email)}
-          className="w-full"
-        />
-        {diffEmail && (
-          <Button
-            formAction={sendEmailCode}
-            variant={"success"}
-            disabled={isEmailPending}
-          >
-            {didSendCode ? "Resend" : "Send"} Verify Code
-          </Button>
-        )}
-      </div>
-      {didSendCode && (
-        <div className="mb-7 flex items-end gap-3">
-          <LabelInput
-            label="Email Cahnge Code (2분)"
-            type="text"
-            name="emailChangeCode"
-            placeholder="인증번호"
-          />
-          <Button
-            formAction={sendEmailCode}
-            variant={"success"}
-            disabled={isEmailPending}
-          >
-            인증메일
-          </Button>
-        </div>
+
+      {isEditingEmail ? (
+        <EmailChanger email={user.email} toggleEditing={toggleEditingEmail} />
+      ) : (
+        <Button
+          onClick={toggleEditingEmail}
+          variant={"success"}
+          className="mt-3"
+        >
+          Change {user.email}
+        </Button>
       )}
+
       <LabelInput
         label="Current Password"
         type="password"
@@ -98,18 +68,16 @@ export default function ChageProfile({ user }: Props) {
         label="New Password Confirm"
         type="password"
         name="passwd2"
-        placeholder="Current Password..."
+        placeholder="New Current Password..."
       />
       <div className="flex justify-center gap-5">
-        <Button variant={"outline"}>
-          <Undo2Icon />
-          Cancel
+        <Button type="reset" variant={"outline"}>
+          <Undo2Icon /> Cancel
         </Button>
-        <Button variant={"primary"}>
-          <CheckLineIcon />
-          Save
+        <Button type="submit" variant={"primary"}>
+          <CheckLineIcon /> Save
         </Button>
       </div>
-    </form>
+    </div>
   );
 }

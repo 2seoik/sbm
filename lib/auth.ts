@@ -99,7 +99,8 @@ export const {
       // update 일때만 session
       const userData = trigger === "update" ? session : user;
       if (trigger === "update") {
-        console.log("🚀 ~ auth.ts ~ userData:", userData);
+        console.log("token EXP >>>>>>>>>>>>>>>>>> ", token.exp);
+        // console.log("🚀 ~ auth.ts ~ userData:", userData);
       }
       if (userData) {
         token.id = userData.id;
@@ -116,6 +117,10 @@ export const {
         //   token.refreshToken = account.refresh_token;
         // }
       }
+      const exp = Math.floor(Date.now() / 1000) + 10 * 60;
+      console.log(">>>>>>>>>>>>>>> EXP CHANGE:", exp);
+      token.exp = exp; // 브라우저는 초
+
       return token;
     },
 
@@ -126,12 +131,24 @@ export const {
         session.user.email = token.email as string;
         session.user.image = token.image as string;
         session.user.isadmin = token.isadmin;
+
+        if (token.exp) {
+          const expireDate = new Date(token.exp * 1000);
+          session.expires = expireDate; // 서버는 밀리세컨드
+
+          const krDate = expireDate.toLocaleString("ko-KR", {
+            timeZone: "Asia/Seoul",
+          });
+
+          console.log(">>>>>>>>>>>>>>>>>> token.exp:", token.exp);
+          console.log(">>>>>>>>>>>>>>>>>> session.expires:", krDate);
+        }
       }
       return session;
     },
   },
   trustHost: true, // CORS
-  jwt: { maxAge: 30 * 60 },
+  jwt: { maxAge: 60 },
   pages: {
     signIn: "/sign",
     error: "/sign/error",

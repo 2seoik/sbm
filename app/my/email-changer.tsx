@@ -44,27 +44,25 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    if (emailCodeRef.current)
-      formData.set("emailChangeCode", emailCodeRef.current?.value);
-
     console.log("🚀 ~ ent:", Object.fromEntries(formData.entries()));
 
     startTransition(async () => {
       if (submitType === "sendmail") {
         const err = await sendEmailChangeCode(formData);
-        if (err) {
-          setValidError(err);
-        } else {
-          setValidError(undefined);
-          toggleSendCode();
-        }
-      } else if (submitType === "confirm") {
-        const [err, mbr] = await updateEmail(formData);
+        if (err) return setValidError(err);
+        setValidError(undefined);
 
+        if (!didSendCode) toggleSendCode();
+      } else if (submitType === "confirm") {
+        formData.set("emailChangeCode", emailCodeRef.current?.value || "");
+
+        const [err, mbr] = await updateEmail(formData);
         if (err) {
           setValidError(err);
         } else {
           await update(mbr);
+          toggleEditing();
+          toggleSendCode();
           router.refresh();
         }
       }
@@ -104,6 +102,9 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
           defaultValue={email || ""}
           error={validError}
           onChange={(e) => setDiffEmail(e.target.value !== email)}
+          onKeyDown={(e) => {
+            e.key === "Escape" && toggleEditing();
+          }}
         />
         {diffEmail && (
           <div
@@ -121,6 +122,7 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
           </div>
         )}
       </form>
+
       {didSendCode && (
         <div className="flex items-center gap-3">
           <LabelInput

@@ -1,4 +1,4 @@
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { existsSync } from "fs";
 import path from "path";
 import z from "zod";
@@ -29,21 +29,65 @@ export const validateObject = <T extends z.ZodObject>(
   const validator = zobj.safeParse(obj);
 
   if (!validator.success) {
-    const err = z.treeifyError(validator.error).properties as ValidError;
-    for (const [prop, value] of Object.entries(obj)) {
-      if (prop.startsWith("$")) continue;
-      if (!err[prop]) err[prop] = { errors: [] };
-      err[prop].value = value as string;
-      // err[prop] = { ...(err[prop] ?? { errors: [] }), value };
-    }
-    return [err];
+    return [validErrorWithData(validator.error, obj)];
   } else {
     return [undefined, validator.data];
   }
 };
 
-export const comparePassword = (p1: string | undefined, p2: string) =>
-  compare(p1 || "", p2);
+const validErrorWithData = (
+  error: z.ZodError | unknown,
+  obj: Record<string, FormDataEntryValue | string | unknown>
+) => {
+  let err =
+    error instanceof z.ZodError &&
+    (z.treeifyError(error as z.ZodError<typeof obj>).properties as ValidError);
+
+  for (const [prop, value] of Object.entries(obj)) {
+    if (prop.startsWith("$")) continue;
+    if (!err)
+      err = {
+        [prop]: {
+          errors: [(error as Error)?.message || JSON.stringify(error)],
+        },
+      };
+    if (!err[prop]) err[prop] = { errors: [] };
+    err[prop].value = value as string;
+  }
+
+  return err as ValidError;
+};
+
+// export const validateAsync = async <T extends z.ZodObject>(
+//   zobj: T,
+//   formData: FormData
+// ): Promise<[ValidError] | [undefined, z.core.output<T>]> =>
+//   validateObjectAsync(zobj, Object.fromEntries(formData.entries()));
+
+export const validateAsync = async <T extends z.ZodObject>(
+  zobj: T,
+  formDataOrObj:
+    | FormData
+    | Record<string, FormDataEntryValue | string | unknown>
+): Promise<[ValidError] | [undefined, z.core.output<T>]> => {
+  const obj =
+    formDataOrObj instanceof FormData
+      ? Object.fromEntries(formDataOrObj.entries())
+      : formDataOrObj;
+  try {
+    const validData = await zobj.parseAsync(obj);
+    return [undefined, validData];
+  } catch (error) {
+    return [validErrorWithData(error, obj)];
+  }
+};
+
+export const comparePassword = (
+  plainPasswd: string | undefined,
+  enctyptPasswd: string
+) => compare(plainPasswd || "", enctyptPasswd);
+
+export const encryptPassword = async (passwd: string) => hash(passwd, 10);
 
 export const existsFile = (filePath: string | undefined | null) => {
   if (!filePath) return filePath;

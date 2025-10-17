@@ -1,15 +1,16 @@
 "use client";
 
-import { CheckLineIcon, Undo2Icon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useReducer } from "react";
 import LabelEdit from "@/components/label-edit";
-import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { updateNickName } from "../sign/sign.action";
 import EmailChanger from "./email-changer";
+import PasswordChanger from "./password-changer";
 
 type Props = {
   user: {
@@ -20,7 +21,11 @@ export default function ChageProfile({ user }: Props) {
   // const { update } = useSession({ required: true }); // 로그인필수 (클라이언트) revalidate, refresh 사용함... 유의해서 사용
   const router = useRouter();
   const { update } = useSession();
-  const [isEditingEmail, toggleEditingEmail] = useReducer((pre) => !pre, true); // TODO : false
+  const [isEditingEmail, toggleEditingEmail] = useReducer((pre) => !pre, false); // TODO : false
+  const [isEditingPassword, toggleEditingPassword] = useReducer(
+    (pre) => !pre,
+    false
+  ); // TODO : false
 
   const changeNickName = async (formData: FormData) => {
     const ent = Object.fromEntries(formData.entries());
@@ -32,51 +37,39 @@ export default function ChageProfile({ user }: Props) {
   };
 
   return (
-    <div className="space-y-3 text-left">
+    <div className="flex flex-col gap-5 text-left">
       <LabelEdit
         name="nickname"
         label="nickname"
         defaultValue={user.name || ""}
         saveAction={changeNickName}
       />
-
-      {isEditingEmail ? (
-        <EmailChanger email={user.email} toggleEditing={toggleEditingEmail} />
-      ) : (
-        <Button
-          onClick={toggleEditingEmail}
-          variant={"success"}
-          className="mt-3"
-        >
-          Change {user.email}
-        </Button>
-      )}
-
-      <LabelInput
-        label="Current Password"
-        type="password"
-        name="curr_passwd"
-        placeholder="Current Password..."
-      />
-      <LabelInput
-        label="New Password"
-        type="password"
-        name="passwd"
-        placeholder="New Password..."
-      />
-      <LabelInput
-        label="New Password Confirm"
-        type="password"
-        name="passwd2"
-        placeholder="New Current Password..."
-      />
-      <div className="flex justify-center gap-5">
-        <Button type="reset" variant={"outline"}>
-          <Undo2Icon /> Cancel
-        </Button>
-        <Button type="submit" variant={"primary"}>
-          <CheckLineIcon /> Save
-        </Button>
+      <div className={cn({ "w-[80%]": !isEditingEmail })}>
+        {isEditingEmail ? (
+          <EmailChanger email={user.email} toggleEditing={toggleEditingEmail} />
+        ) : (
+          <Button
+            onClick={toggleEditingEmail}
+            variant={"success"}
+            className="mt-3 h-12 w-full"
+          >
+            <PencilIcon /> 이메일 변경 {user.email}
+          </Button>
+        )}
+      </div>
+      <div className={cn({ "w-[80%]": !isEditingPassword })}>
+        {isEditingPassword ? (
+          <PasswordChanger toggleEditing={toggleEditingPassword} />
+        ) : (
+          <Button
+            onClick={toggleEditingPassword}
+            variant={"destructive"}
+            className="mt-3 h-12 w-full"
+          >
+            <PencilIcon />
+            비밀번호 변경
+          </Button>
+        )}
       </div>
     </div>
   );

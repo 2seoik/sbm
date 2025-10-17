@@ -1,6 +1,5 @@
 "use server";
 
-import { hash } from "bcryptjs";
 import { existsSync, mkdirSync } from "fs";
 import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -13,9 +12,11 @@ import prisma, { findMemberByEmail } from "@/lib/db";
 import { newToken, uniqId, uniqNumId } from "@/lib/utils";
 import {
   comparePassword,
+  encryptPassword,
   existsEmail,
   type ValidError,
   validate,
+  validateAsync,
 } from "@/lib/validator";
 import type { SendMailBody } from "../api/sendmail/route";
 
@@ -105,7 +106,7 @@ export const regist = async (
   const existsErr = existsEmail(email);
   if (existsErr) return existsErr;
 
-  const passwd = await hash(orgPasswd, 10);
+  const passwd = await encryptPassword(orgPasswd);
   const emailcheck = newToken();
 
   await prisma.member.create({
@@ -247,7 +248,8 @@ export const resetPassword = async (
     redirect("/sign/error?error=InvalidEmailCheck");
   }
 
-  const passwd = await hash(newPasswd, 10);
+  const passwd = await encryptPassword(newPasswd);
+
   await prisma.member.update({
     where: { email, emailcheck },
     data: {
@@ -435,7 +437,7 @@ export const sendEmailChangeCode = async (formData: FormData) => {
     throw new Error("로그인이 필요합니다.");
 
   const { email, name } = session.user;
-  const mbr = await findMemberByEmail(email);
+  // const mbr = await findMemberByEmail(email);
 
   const zobj = z.object({
     newEmail: z.email(),
@@ -470,7 +472,7 @@ export const sendEmailChangeCode = async (formData: FormData) => {
   }, 2 * 60 * 1000);
 
   await sendMailByFetch({
-    email,
+    email: newEmail, // 어뷰징 위험있음...
     emailcheck,
     nickname: name || "",
     emailType: "emailChangeCode",
@@ -521,4 +523,74 @@ export const updateEmail = async (formData: FormData) => {
   console.log("🚀 ~ sign.action.ts ~ newMbr:", newMbr);
 
   return [null, newMbr] as const;
+};
+
+export const updatePassword = async (formData: FormData) => {
+  const session = await auth();
+  if (!session?.user || !session.user.email) throw new Error("Need Login!");
+
+  const { email } = session.user;
+  const mbr = await findMemberByEmail(email, true);
+
+  const zobj = z
+    .object({
+      curr_passwd: z.string().optional(),
+      passwd: z.string().min(6),
+      passwd2: z.string().min(6),
+    })
+    .superRefine(async ({ curr_passwd, passwd, passwd2 }, ctx) => {
+      const preIssues = ctx.issues;
+      ctx.issues = [];
+
+      const isMatchPassword = await comparePassword(
+        curr_passwd || "",
+        mbr?.passwd || ""
+      );
+
+      console.log("🚀 ~ sign.action.ts ~ isMatchPassword:", isMatchPassword);
+
+      if (!isMatchPassword) {
+        ctx.addIssue({
+          code: "custom",
+          message: "현재 비밀번호가 일치하지 않습니다.",
+          path: ["curr_passwd"],
+        });
+      }
+
+      if (passwd !== passwd2) {
+        ctx.addIssue({
+          code: "custom",
+          message: "새로운 비밀번호가 일치하지 않습니다.",
+          path: ["passwd2"],
+        });
+      }
+      ctx.issues = [...ctx.issues, ...preIssues];
+    });
+
+  // TODO : validate 함수의 async 분기 필요
+
+  const [err, data] = await validateAsync(zobj, formData);
+  if (err) return err;
+
+  const passwd = await encryptPassword(data.passwd);
+
+  await prisma.member.update({
+    where: { email },
+    data: { passwd },
+  });
+};
+
+export const withdraw = async () => {
+  const session = await auth();
+  if (!session?.user || !session.user.email) throw new Error("Need Login!");
+
+  const { email } = session.user;
+  const outdt = new Date().toISOString().split("T")[0];
+  await prisma.member.update({
+    where: { email },
+    data: { outdt },
+  });
+
+  await logout();
+  // revalidatePath("/"); // redirectTo 가 없다면 revalidate 사용해야함.
 };

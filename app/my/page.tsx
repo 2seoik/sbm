@@ -1,13 +1,12 @@
-import { Trash2Icon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { use } from "react";
 import ImageUploader from "@/components/image-uploader";
 import SignOutButton from "@/components/signout-button";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import DummyProfile from "@/public/profile_dummy.png";
 import { updateProfileImage } from "../sign/sign.action";
 import ChageProfile from "./change-profile";
+import WithDrawButton from "./withdraw-buttons";
 
 export default function My() {
   const session = use(auth());
@@ -30,17 +29,17 @@ export default function My() {
               changeImage={updateProfileImage}
             />
             {/* <Img src={image || DummyProfile} /> */}
-            <div>
-              <SignOutButton name={name} />
-              <Button variant={"destructive"} className="mt-3 w-full">
-                <Trash2Icon />
-                탈퇴
-              </Button>
-            </div>
           </div>
 
-          <div className="col-span-2 border p-3">
+          <div className="col-span-2 p-3">
             <ChageProfile user={session.user} />
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 gap-2">
+          <SignOutButton name={name} />
+          <div className="col-span-2 text-right">
+            <WithDrawButton />
           </div>
         </div>
       </div>

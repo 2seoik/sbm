@@ -1,4 +1,5 @@
 import NextAuth, { AuthError } from "next-auth";
+import { decode, encode } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
@@ -8,6 +9,8 @@ import z from "zod";
 import prisma, { findMemberByEmail } from "./db";
 import { comparePassword, validateObject } from "./validator";
 
+export const MAX_AGE = 30 * 60;
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -15,7 +18,15 @@ export const {
   signOut,
 } = NextAuth({
   providers: [
-    Google,
+    Google({
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+    }),
     GitHub,
     Kakao,
     Naver,
@@ -117,9 +128,9 @@ export const {
         //   token.refreshToken = account.refresh_token;
         // }
       }
-      const exp = Math.floor(Date.now() / 1000) + 10 * 60;
-      console.log(">>>>>>>>>>>>>>> EXP CHANGE:", exp);
-      token.exp = exp; // 브라우저는 초
+      // const exp = Math.floor(Date.now() / 1000) + 10 * 60;
+      // console.log(">>>>>>>>>>>>>>> EXP CHANGE:", exp);
+      // token.exp = exp; // 브라우저는 초
 
       return token;
     },
@@ -134,27 +145,36 @@ export const {
 
         if (token.exp) {
           const expireDate = new Date(token.exp * 1000);
-          session.expires = expireDate; // 서버는 밀리세컨드
+          session.expires = expireDate; // 서버는 datetime
 
           const krDate = expireDate.toLocaleString("ko-KR", {
             timeZone: "Asia/Seoul",
           });
 
-          console.log(">>>>>>>>>>>>>>>>>> token.exp:", token.exp);
-          console.log(">>>>>>>>>>>>>>>>>> session.expires:", krDate);
+          // console.log(">>>>>>>>>>>>>>>>>> token.exp:", token.exp);
+          // console.log(">>>>>>>>>>>>>>>>>> session.expires:", krDate);
         }
       }
       return session;
     },
   },
   trustHost: true, // CORS
-  jwt: { maxAge: 60 },
+  jwt: {
+    maxAge: MAX_AGE,
+    async encode(params) {
+      return encode(params);
+    },
+    async decode(params) {
+      return decode(params);
+    },
+  },
   pages: {
     signIn: "/sign",
     error: "/sign/error",
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // database
+    maxAge: MAX_AGE, // default 1Moth
   },
   secret: process.env.AUTH_SECRET as string,
 });

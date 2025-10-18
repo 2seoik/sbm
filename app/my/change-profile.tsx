@@ -38,12 +38,15 @@ export default function ChageProfile({ user }: Props) {
 
   return (
     <div className="flex flex-col gap-5 text-left">
-      <LabelEdit
-        name="nickname"
-        label="nickname"
-        defaultValue={user.name || ""}
-        saveAction={changeNickName}
-      />
+      <div className="w-[80%]">
+        <LabelEdit
+          name="nickname"
+          label="nickname"
+          defaultValue={user.name || ""}
+          saveAction={changeNickName}
+          inputClassName="w-full"
+        />
+      </div>
       <div className={cn({ "w-[80%]": !isEditingEmail })}>
         {isEditingEmail ? (
           <EmailChanger email={user.email} toggleEditing={toggleEditingEmail} />

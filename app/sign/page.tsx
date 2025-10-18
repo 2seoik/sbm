@@ -16,7 +16,7 @@ export default function Sign({ searchParams }: Props) {
   const { redirectTo } = use(searchParams);
 
   return (
-    <div className="grid h-full place-items-center px-10">
+    <div className="container mx-auto grid h-full place-items-center px-10">
       <div className="flex w-full overflow-hidden rounded-lg border shadow-md [&>div]:p-4">
         <div className="flex-1">
           <div className="flex items-center gap-5">

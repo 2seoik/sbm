@@ -42,8 +42,8 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="container mx-auto flex h-screen flex-col justify-center border">
-              <header className="flex justify-between border border-b-4 border-b-amber-500">
+            <div className="flex h-screen flex-col justify-center">
+              <header className="flex justify-between border border-b-4 border-b-amber-500 px-1">
                 <Link
                   href="/"
                   className="flex items-center font-semibold text-3xl text-zinc-800 tracking-tight"
@@ -53,7 +53,7 @@ export default async function RootLayout({
                 </Link>
                 <Nav />
               </header>
-              <main className="flex-1"> {children}</main>
+              <main className="flex-1 overflow-hidden px-2">{children}</main>
               <footer className="mb-1">
                 <div className="flex justify-between">
                   <div className="text-zinc-500">&#169; shlee 2025</div>

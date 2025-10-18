@@ -6,13 +6,14 @@ const REFRESH_THRESHOLD = 10 * 60 * 1000; // cookie 굽는 단위(10분)
 // const REFRESH_THRESHOLD = 10 * 1000; // cookie 굽는 단위(시간)
 const SALT = "authjs.session-token";
 const SECRET = process.env.AUTH_SECRET || "";
-const NEED_COOKIES = ["/"];
+const NEED_COOKIES_PATH = ["/"];
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: SECRET });
 
   const pathname = req.nextUrl.pathname;
-  if (!token && NEED_COOKIES.includes(pathname)) return NextResponse.next();
+  if (!token && NEED_COOKIES_PATH.includes(pathname))
+    return NextResponse.next();
 
   if (!token)
     return NextResponse.redirect(
@@ -32,6 +33,7 @@ export async function middleware(req: NextRequest) {
   const exp = token.exp ? token.exp * 1000 : 0;
   if (exp - Date.now() < MAX_AGE * 1000 - REFRESH_THRESHOLD) {
     const res = NextResponse.next();
+
     const newToken = await encode({
       token,
       secret: SECRET,
@@ -48,7 +50,6 @@ export async function middleware(req: NextRequest) {
       sameSite: "lax", // CORS
       path: "/",
     });
-
     return res;
   }
 

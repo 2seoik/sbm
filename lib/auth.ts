@@ -143,17 +143,17 @@ export const {
         session.user.image = token.image as string;
         session.user.isadmin = token.isadmin;
 
-        if (token.exp) {
-          const expireDate = new Date(token.exp * 1000);
-          session.expires = expireDate; // 서버는 datetime
+        // if (token.exp) {
+        //   const expireDate = new Date(token.exp * 1000);
+        //   session.expires = expireDate; // 서버는 datetime
 
-          const krDate = expireDate.toLocaleString("ko-KR", {
-            timeZone: "Asia/Seoul",
-          });
+        //   const krDate = expireDate.toLocaleString("ko-KR", {
+        //     timeZone: "Asia/Seoul",
+        //   });
 
-          // console.log(">>>>>>>>>>>>>>>>>> token.exp:", token.exp);
-          // console.log(">>>>>>>>>>>>>>>>>> session.expires:", krDate);
-        }
+        //   // console.log(">>>>>>>>>>>>>>>>>> token.exp:", token.exp);
+        //   // console.log(">>>>>>>>>>>>>>>>>> session.expires:", krDate);
+        // }
       }
       return session;
     },
@@ -173,8 +173,8 @@ export const {
     error: "/sign/error",
   },
   session: {
-    strategy: "jwt", // database
-    maxAge: MAX_AGE, // default 1Moth
+    strategy: "jwt", // or 'database'
+    maxAge: MAX_AGE, // default 1Month
   },
   secret: process.env.AUTH_SECRET as string,
 });

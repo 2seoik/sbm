@@ -40,9 +40,9 @@ export const findMemberById = async (id: string | number) =>
       id: Number(id),
     },
   });
-``;
-export const findMemberByIdWithCount = async (id: string | number) => {
-  const sql = await prisma.member.findUnique({
+
+export const findMemberByIdWithCount = async (id: string | number) =>
+  await prisma.member.findUnique({
     where: {
       id: Number(id),
     },
@@ -56,7 +56,41 @@ export const findMemberByIdWithCount = async (id: string | number) => {
     },
   });
 
-  console.log("sql", sql);
+export type Books = Awaited<ReturnType<typeof findBooksByMemberId>>;
 
-  return sql;
-};
+export const findBooksByMemberId = async (
+  memId: string | number,
+  withdel = false,
+  ispublic = false
+) =>
+  prisma.book.findMany({
+    where: {
+      member: Number(memId),
+      withdel,
+      ispublic,
+    },
+    include: {
+      Mark: true,
+    },
+  });
+
+export const findBooksByMemberId2 = async (
+  memId: string | number,
+  withdel = false,
+  ispublic = false
+) =>
+  prisma.book.findMany({
+    where: {
+      member: Number(memId),
+      withdel,
+      ispublic,
+    },
+    select: {
+      id: true,
+      member: true,
+      title: true,
+      withdel: true,
+      ispublic: true,
+      Mark: true,
+    },
+  });

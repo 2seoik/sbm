@@ -1,48 +1,47 @@
-import { MoreHorizontalIcon, PlusIcon } from "lucide-react";
+import { MoreHorizontalIcon } from "lucide-react";
+import AddMarkButton from "@/components/add-mark-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { default as UserMark } from "@/components/user-mark";
+import type { Books } from "@/lib/db";
 
-export default function Book() {
-  return (
-    <div className="flex w-96 flex-col justify-start rounded-lg border-2 border-red-300 bg-slate-200 px-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <h1 className="my-2 font-medium text-lg">Book Title1</h1>
-          <Badge
-            variant={"outline"}
-            className="ml-2 h-5 min-w-5 rounded-full bg-slate-50 px-1"
+export default function Book({ books }: { books: Books }) {
+  return books.map((book) => {
+    const { id, title, Mark: marks } = book;
+    return (
+      <div
+        key={id}
+        className="flex w-96 flex-col justify-start rounded-lg border-2 border-red-300 bg-slate-200 px-2"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <h1 className="my-2 font-medium text-lg">{title}</h1>
+            <Badge
+              variant={"outline"}
+              className="ml-2 h-5 min-w-5 rounded-full bg-slate-50 px-1"
+            >
+              {marks.length}
+            </Badge>
+          </div>
+          <Button
+            variant={"ghost"}
+            className="font-semibold text-lg hover:bg-slate-300"
           >
-            8
-          </Badge>
+            <MoreHorizontalIcon />
+          </Button>
         </div>
-        <Button
-          variant={"ghost"}
-          className="font-semibold text-lg hover:bg-slate-300"
-        >
-          <MoreHorizontalIcon />
-        </Button>
-      </div>
+        <UserMark marks={marks} />
+        <div className="my-1 flex justify-between font-medium">
+          <AddMarkButton id={id} />
 
-      <div className="max-h-full space-y-2 overflow-y-scroll rounded-md bg-sky-300 p-3">
-        <h3 className="bg-white text-9xl">Marks</h3>
-        <h3 className="bg-white text-9xl">Marks</h3>
-        <h3 className="bg-white text-9xl">Marks</h3>
+          <Button
+            variant={"ghost"}
+            className="font-semibold text-lg hover:bg-slate-300"
+          >
+            <MoreHorizontalIcon />
+          </Button>
+        </div>
       </div>
-      <div className="my-1 flex justify-between font-medium">
-        <Button
-          variant={"ghost"}
-          className="flex w-[80%] justify-start font-semibold text-lg hover:bg-slate-300"
-        >
-          <PlusIcon /> Add a Mark
-        </Button>
-
-        <Button
-          variant={"ghost"}
-          className="font-semibold text-lg hover:bg-slate-300"
-        >
-          <MoreHorizontalIcon />
-        </Button>
-      </div>
-    </div>
-  );
+    );
+  });
 }

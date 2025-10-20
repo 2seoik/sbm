@@ -2,7 +2,7 @@ import { PlusIcon } from "lucide-react";
 import { use } from "react";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/user-avatar";
-import { findMemberByIdWithCount } from "@/lib/db";
+import { findBooksByMemberId, findMemberByIdWithCount } from "@/lib/db";
 import Book from "./book";
 
 type Props = {
@@ -12,6 +12,7 @@ type Props = {
 export default function BookCaseNickname({ params }: Props) {
   const { id } = use(params);
   const mbr = use(findMemberByIdWithCount(id));
+  const books = use(findBooksByMemberId(id));
 
   if (!mbr) return <h1 className="text-2xl">사용자가 없습니다.</h1>;
 
@@ -29,7 +30,7 @@ export default function BookCaseNickname({ params }: Props) {
       </h1>
 
       <div className="my-2 flex gap-2 overflow-x-scroll">
-        <Book />
+        <Book books={books} />
         <Button
           variant={"ghost"}
           className="flex w-96 justify-start bg-slate-200 font-semibold text-lg hover:bg-slate-300"

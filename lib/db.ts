@@ -1,8 +1,18 @@
+"only server";
+
 import { PrismaClient } from "@/lib/generated/prisma/client";
 
-const prisma = new PrismaClient();
+const newInstance = () => new PrismaClient();
+
+// biome-ignore lint/suspicious/noShadowRestrictedNames: for too many connections problems
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof newInstance>;
+} & typeof global;
+
+const prisma = globalThis.prismaGlobal ?? newInstance();
 
 export default prisma;
+globalThis.prismaGlobal = prisma;
 
 // 이메일로 회원찾기
 export const findMemberByEmail = async (
@@ -41,8 +51,8 @@ export const findMemberById = async (id: string | number) =>
     },
   });
 ``;
-export const findMemberByIdWithCount = async (id: string | number) => {
-  const sql = await prisma.member.findUnique({
+export const findMemberByIdWithCount = async (id: string | number) =>
+  await prisma.member.findUnique({
     where: {
       id: Number(id),
     },
@@ -56,7 +66,36 @@ export const findMemberByIdWithCount = async (id: string | number) => {
     },
   });
 
-  console.log("sql", sql);
+// Book
+export type BookAllColumn = Awaited<ReturnType<typeof findBookWithMarkById>>;
+export type BookData = Omit<
+  NonNullable<BookAllColumn>,
+  "Mark" | "createdAt" | "updatedAt"
+>;
 
-  return sql;
-};
+export const findBookId = async (id: number) =>
+  prisma.book.findUnique({
+    where: {
+      id,
+    },
+  });
+
+export const findBookWithMarkById = async (id: number) =>
+  prisma.book.findUnique({
+    where: {
+      id,
+    },
+    include: { Mark: true },
+  });
+
+// 이렇게도 사용하지만 좋지는 않음.
+//   export const findBookWithMarkById = async (
+//   id: number,
+//   includeMark: boolean = true
+// ) =>
+//   prisma.book.findUnique({
+//     where: {
+//       id,
+//     },
+//     include: { Mark: includeMark },
+//   });

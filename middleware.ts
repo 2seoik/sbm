@@ -12,13 +12,14 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: SECRET });
 
   const pathname = req.nextUrl.pathname;
-  if (!token && NEED_COOKIES_PATH.includes(pathname))
-    return NextResponse.next();
+  if (!token) {
+    if (NEED_COOKIES_PATH.includes(pathname) || pathname.includes("/bookcase/"))
+      return NextResponse.next();
 
-  if (!token)
     return NextResponse.redirect(
       new URL(`/sign?redirectTo=${pathname}`, req.url)
     );
+  }
 
   // console.log("🚀 ~ middleware.ts ~ token: >>>>>>>>>>>>>> ", token);
   // const pathname = req.nextUrl.pathname;
@@ -61,7 +62,7 @@ export const config = {
   // runtime: "nodejs",
 
   matcher: [
-    "/((?!sign|_next/static|_next/image|api/auth|api/sendmail|forgotpasswd|registcheck|favicon.ico|robots.txt|.well-known|bookcase/|profile|$).*)",
+    "/((?!sign|_next/static|_next/image|api/auth|api/sendmail|forgotpasswd|registcheck|favicon.ico|robots.txt|.well-known|profile|$).*)",
     "/",
     // "/api/:path*",
   ],

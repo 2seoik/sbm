@@ -53,7 +53,7 @@ export default async function RootLayout({
                 </Link>
                 <Nav />
               </header>
-              <main className="flex-1 overflow-hidden px-2">{children}</main>
+              <main className="flex-1 overflow-auto px-2">{children}</main>
               <footer className="mb-1">
                 <div className="flex justify-between">
                   <div className="text-zinc-500">&#169; shlee 2025</div>

@@ -1,13 +1,14 @@
 import {
   AlbumIcon,
   BookMarkedIcon,
+  HeartPlusIcon,
   PlusIcon,
-  UserRoundPlusIcon,
 } from "lucide-react";
 import { use } from "react";
 import IconLabel from "@/components/icon-label";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/user-avatar";
+import { auth } from "@/lib/auth";
 import prisma, { findMemberByIdWithCount } from "@/lib/db";
 import Book from "./book";
 import BookDialog from "./book-dialog";
@@ -17,6 +18,8 @@ type Props = {
 };
 
 export default function BookCaseNickname({ params }: Props) {
+  const session = use(auth());
+  const isMyBookcase = !!session?.user;
   const { id } = use(params); // params 이기 떄문에 string
   const mbr = use(findMemberByIdWithCount(id));
 
@@ -46,7 +49,7 @@ export default function BookCaseNickname({ params }: Props) {
           <IconLabel icon={<AlbumIcon />} noti="primary">
             {mbr._count.Mark}
           </IconLabel>
-          <IconLabel icon={<UserRoundPlusIcon />} noti="destructive">
+          <IconLabel icon={<HeartPlusIcon />} noti="destructive">
             50
           </IconLabel>
         </span>
@@ -56,14 +59,16 @@ export default function BookCaseNickname({ params }: Props) {
         {books.map((book) => (
           <Book key={book.id} book={book} />
         ))}
-        <BookDialog>
-          <Button
-            variant={"ghost"}
-            className="flex w-72 justify-start rounded-full bg-slate-200 font-semibold text-lg hover:bg-slate-300"
-          >
-            <PlusIcon /> Add a Book
-          </Button>
-        </BookDialog>
+        {isMyBookcase && (
+          <BookDialog>
+            <Button
+              variant={"ghost"}
+              className="flex w-72 justify-start rounded-full bg-slate-200 font-semibold text-lg hover:bg-slate-300"
+            >
+              <PlusIcon /> Add a Book
+            </Button>
+          </BookDialog>
+        )}
       </div>
     </div>
   );

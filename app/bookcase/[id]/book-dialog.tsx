@@ -2,15 +2,10 @@
 
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
-import {
-  type PropsWithChildren,
-  useActionState,
-  useEffect,
-  useState,
-} from "react";
+import { type PropsWithChildren, useActionState, useState } from "react";
+import CheckSwitch from "@/components/check-switch";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -22,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAlerter } from "@/hooks/contexts/alerter";
 import type { BookData } from "@/lib/db";
 import type { ValidError } from "@/lib/validator";
 import { deleteBook, saveBook } from "./book.action";
@@ -30,7 +26,7 @@ export default function BookDialog({
   book = {
     id: 0,
     title: "",
-    ispublic: true,
+    ispublic: false,
     withdel: false,
     remark: "",
     member: 0,
@@ -40,25 +36,39 @@ export default function BookDialog({
   book?: BookData;
 }>) {
   const router = useRouter();
-  const [ispublic, setPublic] = useState(false);
-  const [withdel, setWithdel] = useState(false);
-
+  const { confirm, alert } = useAlerter();
+  // const [ispublic, setPublic] = useState(false);
+  // const [withdel, setWithdel] = useState(false);
+  const [isOpen, setOpen] = useState(false);
   const [validError, save, isPending] = useActionState(
     async (_prev: ValidError | undefined, formData: FormData) => {
-      formData.set("ispublic", ispublic ? "on" : "");
-      formData.set("withdel", withdel ? "on" : "");
+      // formData.set("ispublic", ispublic ? "on" : "");
+      // formData.set("withdel", withdel ? "on" : "");
+
+      formData.set("id", String(book.id));
       const err = await saveBook(formData);
       if (err) {
         return err;
       }
       router.refresh();
+      setOpen(false);
     },
     undefined
   );
 
   const remove = async () => {
-    await deleteBook(book.id);
+    const ret = await confirm({ title: "삭제 하시겠습니까?" });
+    if (!ret) return;
+
+    const err = await deleteBook(book.id);
+    if (err) {
+      await alert({ title: err.id.errors[0], okText: "Confirm" });
+      setOpen(false);
+      return;
+    }
+
     router.refresh();
+    setOpen(false);
   };
 
   //   const submitHandler = (e: FormEvent<HTMLFormElement>) => {
@@ -71,15 +81,15 @@ export default function BookDialog({
   //   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    if (book) {
-      setPublic(!!validError?.ispublic?.value);
-      setWithdel(!!validError?.withdel?.value);
-    }
-  }, [validError]);
+  // useEffect(() => {
+  //   if (book) {
+  //     setPublic(book.ispublic || !!validError?.ispublic?.value);
+  //     setWithdel(!!validError?.withdel?.value);
+  //   }
+  // }, [validError]);
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <form action={save}>
@@ -93,11 +103,11 @@ export default function BookDialog({
               label="title"
               name="title"
               error={validError}
-              //   defaultValue={book.title}
+              defaultValue={book.title}
               defaultChecked
             />
 
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <Checkbox
                 id="ispublic"
                 name="ispublic"
@@ -107,11 +117,25 @@ export default function BookDialog({
               <Label htmlFor="ispublic" className="cursor-pointer">
                 Public {ispublic && "XX"}
               </Label>
-            </div>
+            </div> */}
+            <CheckSwitch
+              name="ispublic"
+              label="Public Book"
+              error={validError}
+              checkValue={book.ispublic}
+            />
 
-            <div>
+            <CheckSwitch
+              name="withdel"
+              label="Open with deletion"
+              type="switch"
+              error={validError}
+              checkValue={book.withdel}
+            />
+
+            {/* <div>
               <div className="flex items-center gap-3">
-                <Checkbox
+                <Switch
                   id="withdel"
                   name="withdel"
                   checked={withdel}
@@ -124,7 +148,7 @@ export default function BookDialog({
               <p className="mt-1 text-red-500 text-sm">
                 {validError?.withdel?.errors[0]}
               </p>
-            </div>
+            </div> */}
 
             <div className="flex flex-col">
               <Label

@@ -1,7 +1,8 @@
 import {
+  AlbumIcon,
+  BookKeyIcon,
   CopyXIcon,
-  LockIcon,
-  LockOpenIcon,
+  HeartPlusIcon,
   MoreHorizontalIcon,
   PlusIcon,
   UserRoundPlusIcon,
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import { type BookAllColumn, findBookWithMarkById } from "@/lib/db";
 import { cn } from "@/lib/utils";
+import BookDialog from "./book-dialog";
 import Mark from "./mark";
 
 type Props =
@@ -41,22 +43,25 @@ export default function Book({ id, book }: Props) {
       <div className="flex items-center justify-between pr-2">
         <h1
           className={cn(
-            "truncate p-2 font-semibold text-xl tracking-tighter",
+            "flex items-center truncate p-2 font-semibold text-xl tracking-tighter",
             ispublic
               ? "text-green-500 text-shadow-green-300"
               : "text-muted-foreground text-shadow-gray-300"
           )}
         >
+          {!ispublic && <BookKeyIcon />}
           {title}
         </h1>
-        {ispublic ? <LockOpenIcon /> : <LockIcon />}
+
         {isMine ? (
-          <Button
-            variant={"ghost"}
-            className="font-semibold text-lg hover:bg-slate-300"
-          >
-            <MoreHorizontalIcon />
-          </Button>
+          <BookDialog book={book}>
+            <Button
+              variant={"ghost"}
+              className="font-semibold text-lg hover:bg-slate-300"
+            >
+              <MoreHorizontalIcon />
+            </Button>
+          </BookDialog>
         ) : (
           ispublic && (
             <Button
@@ -82,15 +87,20 @@ export default function Book({ id, book }: Props) {
         <div className="my-1 flex items-center justify-between pr-2 font-medium">
           <Button
             variant={"ghost"}
-            className="flex w-[80%] justify-start font-semibold text-lg hover:bg-slate-300"
+            className="flex w-[60%] justify-start font-semibold text-lg hover:bg-slate-300"
           >
             <PlusIcon /> Add a Mark
           </Button>
-          {withdel && (
-            <ToolTip content={"With Del"}>
-              <CopyXIcon className="text-red-500" />
-            </ToolTip>
-          )}
+          <div className="flex">
+            <IconLabel icon={<AlbumIcon />}>99</IconLabel>
+            {ispublic && <IconLabel icon={<HeartPlusIcon />}>99</IconLabel>}
+
+            {withdel && (
+              <ToolTip content={"With Del"}>
+                <CopyXIcon className="text-red-500" />
+              </ToolTip>
+            )}
+          </div>
         </div>
       )}
     </div>

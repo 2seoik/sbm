@@ -36,7 +36,7 @@ export default function BookDialog({
   book?: BookData;
 }>) {
   const router = useRouter();
-  const { confirm, alert } = useAlerter();
+  const { confirm, alert, prompt } = useAlerter();
   // const [ispublic, setPublic] = useState(false);
   // const [withdel, setWithdel] = useState(false);
   const [isOpen, setOpen] = useState(false);
@@ -46,6 +46,7 @@ export default function BookDialog({
       // formData.set("withdel", withdel ? "on" : "");
 
       formData.set("id", String(book.id));
+      // console.log(">>>>>>", Object.fromEntries(formData.entries()));
       const err = await saveBook(formData);
       if (err) {
         return err;
@@ -57,9 +58,24 @@ export default function BookDialog({
   );
 
   const remove = async () => {
-    const ret = await confirm({ title: "삭제 하시겠습니까?" });
+    const ret = await confirm({
+      title: "삭제 하시겠습니까?",
+    });
     if (!ret) return;
 
+    const code = await prompt({
+      title: "삭제 코드 입력",
+      desc: "삭제하려면 코드가 필요합니다.",
+      placeholder: "코드를 입력하세요...",
+    });
+    if (!code) return;
+    if (code !== "0000") {
+      await alert({
+        title: "코드가 일치하지 않습니다!",
+        variant: "destructive",
+      });
+      return;
+    }
     const err = await deleteBook(book.id);
     if (err) {
       await alert({ title: err.id.errors[0], okText: "Confirm" });
@@ -94,7 +110,7 @@ export default function BookDialog({
       <DialogContent>
         <form action={save}>
           <DialogHeader>
-            <DialogTitle>{!book.id ? "Create" : "Edit"} Book</DialogTitle>
+            <DialogTitle>Book {!book.id ? "생성" : "수정"}</DialogTitle>
             <DialogDescription>descript...</DialogDescription>
           </DialogHeader>
 
@@ -120,14 +136,14 @@ export default function BookDialog({
             </div> */}
             <CheckSwitch
               name="ispublic"
-              label="Public Book"
+              label="공개 설정"
               error={validError}
               checkValue={book.ispublic}
             />
 
             <CheckSwitch
               name="withdel"
-              label="Open with deletion"
+              label="열람 및 삭제"
               type="switch"
               error={validError}
               checkValue={book.withdel}
@@ -158,7 +174,7 @@ export default function BookDialog({
                 Description
               </Label>
               <Textarea
-                placeholder="description..."
+                placeholder="Book 설명..."
                 id="remark"
                 name="remark"
                 defaultValue={book.remark ?? ""}
@@ -168,17 +184,17 @@ export default function BookDialog({
 
           <DialogFooter className="mt-5">
             <DialogClose asChild>
-              <Button variant={"outline"}>Cancel</Button>
+              <Button variant={"outline"}>취소</Button>
             </DialogClose>
 
             {!!book.id && (
               <Button onClick={remove} type="button" variant={"destructive"}>
-                Delete
+                삭제
               </Button>
             )}
 
             <Button type="submit" disabled={isPending}>
-              {book.id ? "Save" : "Create"} Book
+              Book {book.id ? "저장" : "생성"}
             </Button>
           </DialogFooter>
         </form>

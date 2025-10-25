@@ -29,7 +29,7 @@ model FollowBook {
   id        Int      @id @default(autoincrement()) @db.UnsignedInt
   createdAt DateTime @default(now()) @db.Timestamp(0)
   book      Int      @db.UnsignedInt
-  member    Int?     @db.UnsignedInt
+  member    Int     @db.UnsignedInt
   Book      Book     @relation(fields: [book], references: [id], onDelete: Cascade, map: "fk_FollowBook_book")
   Member    Member?  @relation(fields: [member], references: [id], map: "fk_FollowBook_member")
 
@@ -41,10 +41,12 @@ model Likes {
   id        Int      @id @default(autoincrement()) @db.UnsignedInt
   createdAt DateTime @default(now()) @db.Timestamp(0)
   mark      Int      @db.UnsignedInt
-  member    Int?     @db.UnsignedInt
+  member    Int     @db.UnsignedInt
   Mark      Mark     @relation(fields: [mark], references: [id], onDelete: Cascade, map: "fk_Likes_mark")
   Member    Member?  @relation(fields: [member], references: [id], map: "fk_Likes_member")
 
+
+  @@unique([mark, member])
   @@index([mark], map: "fk_Likes_mark")
   @@index([member], map: "fk_Likes_member")
 }
@@ -54,11 +56,11 @@ model Mark {
   createdAt DateTime @default(now()) @db.Timestamp(0)
   updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
   book      Int      @db.UnsignedInt
-  title     String   @db.VarChar(15)
-  link      String   @db.VarChar(512)
-  image     String?  @db.VarChar(255)
-  maker     Int?     @db.UnsignedInt
-  descript  String?  @db.VarChar(512)
+  title     String   @db.VarChar(100)
+  link      String   @db.VarChar(1000)
+  image     String?  @db.VarChar(500)
+  maker     Int     @db.UnsignedInt
+  descript  String?  @db.VarChar(1000)
   Likes     Likes[]
   Book      Book     @relation(fields: [book], references: [id], onDelete: Cascade, map: "fk_Mark_book")
   Member    Member?  @relation(fields: [maker], references: [id], map: "fk_Mark_maker_Member")
@@ -98,6 +100,7 @@ model Report {
   Mark      Mark     @relation(fields: [mark], references: [id], onDelete: Cascade, map: "fk_Report_mark")
   Member    Member   @relation(fields: [member], references: [id], onDelete: Cascade, map: "fk_Report_member")
 
+  @@unique([mark, member])
   @@index([mark], map: "fk_Report_mark")
   @@index([member], map: "fk_Report_member")
 }
@@ -107,7 +110,7 @@ model Talk {
   createdAt DateTime @default(now()) @db.Timestamp(0)
   updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
   mark      Int      @db.UnsignedInt
-  member    Int?     @db.UnsignedInt
+  member    Int     @db.UnsignedInt
   msg       String   @db.VarChar(511)
   Mark      Mark     @relation(fields: [mark], references: [id], onDelete: Cascade, map: "fk_Talk_mark")
   Member    Member?  @relation(fields: [member], references: [id], map: "fk_Talk_member")

@@ -22,7 +22,7 @@ export const saveBook = async (formData: FormData) => {
     })
     .refine(({ ispublic, withdel }) => !ispublic || (ispublic && !withdel), {
       path: ["withdel"],
-      message: "퍼블릭일경우 삭제할 수 없습니다.",
+      message: "Book이 공개된 경우 열람 및 삭제기능을 활성화 할 수 없습니다.",
     });
 
   const [err, data] = validate(zobj, formData);
@@ -94,5 +94,47 @@ export const deleteBook = async (id: number) => {
           id,
           member: Number(userId),
         },
+  });
+};
+
+export const likesAndReports = async (member: number) => {
+  const ilikes = await prisma.likes.findMany({
+    where: { member },
+    select: { id: true },
+  });
+
+  const ireports = await prisma.report.findMany({
+    where: { member },
+    select: { id: true },
+  });
+
+  return [ilikes, ireports];
+};
+
+const checkLogin = async () => {
+  const session = await auth();
+  if (!session?.user || !session.user.id) throw new Error("Need Login");
+  return session.user;
+};
+
+export const deleteMark = async (id: number, bookOwner: number) => {
+  const { id: userId, isadmin } = await checkLogin();
+
+  // check exists
+  const mark = await prisma.mark.findUnique({
+    where: { id },
+  });
+  if (!mark) throw new Error("존재하지 않는 Mark 입니다.");
+
+  if (!isadmin && Number(userId) !== bookOwner && mark.maker !== Number(userId))
+    throw new Error("삭제 권한이 없습니다.");
+
+  // if (!mark)
+  //   throw new Error(
+  //     isadmin ? "존재하지 않는 Mark입니다." : "삭제 권한이 없습니다."
+  //   );
+
+  await prisma.mark.delete({
+    where: { id },
   });
 };

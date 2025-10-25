@@ -38,8 +38,14 @@ export default function Book({ id, book }: Props) {
   // 숫자를 감싸는것보다, 문자를감싸는게 유리!
   const isMine = session?.user.id === String(member);
 
+  // server 컴포넌트이기 때문에 가능
+  const totalLikesCnt = book?.Mark.reduce(
+    (acc, mark) => acc + mark._count.Likes,
+    0
+  );
+
   return (
-    <div className="flex w-80 flex-shrink-0 flex-col justify-start rounded-lg bg-slate-200 pl-2">
+    <div className="flex w-72 flex-shrink-0 flex-col justify-start rounded-lg bg-slate-200 pl-2 dark:bg-muted">
       <div className="flex items-center justify-between pr-2">
         <h1
           className={cn(
@@ -78,25 +84,51 @@ export default function Book({ id, book }: Props) {
           )
         )}
       </div>
-      {/* mark group */}
+
+      {/* Mark group */}
       <div className="max-h-full space-y-2 overflow-y-scroll pr-2 pb-3">
-        <Mark />
-        <Mark />
+        {book?.Mark.length ? (
+          book?.Mark.map((mark) => (
+            <Mark
+              key={mark.id}
+              mark={mark}
+              withdel={withdel}
+              bookOwner={book.member}
+            />
+          ))
+        ) : (
+          <h1 className="rounded-lg bg-white p-5 font-medium text-muted-foreground text-sm">
+            Mark가 없습니다.
+          </h1>
+        )}
       </div>
+
       {isMine && (
         <div className="my-1 flex items-center justify-between pr-2 font-medium">
           <Button
             variant={"ghost"}
-            className="flex w-[60%] justify-start font-semibold text-lg hover:bg-slate-300"
+            className="flex rounded-full font-semibold text-lg hover:bg-muted-foreground/30 dark:hover:bg-muted-foreground/30"
           >
-            <PlusIcon /> Add a Mark
+            <PlusIcon /> Mark 만들기
           </Button>
-          <div className="flex">
-            <IconLabel icon={<AlbumIcon />}>99</IconLabel>
-            {ispublic && <IconLabel icon={<HeartPlusIcon />}>99</IconLabel>}
+          <div className="flex gap-2">
+            {/* Mark 갯수 */}
+            <IconLabel icon={<AlbumIcon />}>{book?.Mark.length}</IconLabel>
+
+            {/* Mark 좋아요 갯수 */}
+            {ispublic && (
+              <IconLabel icon={<HeartPlusIcon className="text-red-400" />}>
+                {totalLikesCnt}
+                {/* 한눈에 값을 확인할수 있기 때문에 아래와 같이 하는 경우도 있음 */}
+                {/* {book?.Mark.reduce((acc, mark) => acc + mark._count.Likes, 0)} */}
+              </IconLabel>
+            )}
 
             {withdel && (
-              <ToolTip content={"With Del"}>
+              <ToolTip
+                content={"해당 Book의 Mark는 열람과 함께 삭제됩니다!"}
+                variant="destructive"
+              >
                 <CopyXIcon className="text-red-500" />
               </ToolTip>
             )}

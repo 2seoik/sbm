@@ -18,18 +18,22 @@ type Props = {
 };
 
 export default function BookCaseNickname({ params }: Props) {
+  const { id } = use(params); // params 이기 떄문에 string
   const session = use(auth());
   const isMyBookcase = !!session?.user;
-  const { id } = use(params); // params 이기 떄문에 string
+  // const isMyBookcase = !!session?.user && session.user.id === id;
   const mbr = use(findMemberByIdWithCount(id));
-
   if (!mbr) return <h1 className="text-2xl">사용자가 없습니다.</h1>;
 
   const books = use(
     prisma.book.findMany({
       where: { member: Number(id) },
       include: {
-        Mark: true,
+        Mark: {
+          include: {
+            _count: { select: { Likes: true, Report: true, Talk: true } },
+          },
+        },
       },
     })
   );
@@ -45,8 +49,10 @@ export default function BookCaseNickname({ params }: Props) {
           </span>
         </div>
         <span className="flex gap-3 text-lg">
-          <IconLabel icon={<BookMarkedIcon />}>{mbr._count.Book}</IconLabel>
-          <IconLabel icon={<AlbumIcon />} noti="primary">
+          <IconLabel icon={<BookMarkedIcon />} noti="success">
+            {mbr._count.Book}
+          </IconLabel>
+          <IconLabel icon={<AlbumIcon />} noti="muted">
             {mbr._count.Mark}
           </IconLabel>
           <IconLabel icon={<HeartPlusIcon />} noti="destructive">
@@ -55,20 +61,21 @@ export default function BookCaseNickname({ params }: Props) {
         </span>
       </h1>
 
+      {isMyBookcase && (
+        <BookDialog>
+          <Button
+            variant={"ghost"}
+            className="flex w-72 justify-start rounded-full bg-slate-200 font-semibold text-lg hover:bg-muted-foreground/30 dark:bg-muted dark:hover:bg-muted-foreground/30"
+          >
+            <PlusIcon /> Book 만들기
+          </Button>
+        </BookDialog>
+      )}
+
       <div className="flex gap-3 overflow-x-scroll py-2">
         {books.map((book) => (
           <Book key={book.id} book={book} />
         ))}
-        {isMyBookcase && (
-          <BookDialog>
-            <Button
-              variant={"ghost"}
-              className="flex w-72 justify-start rounded-full bg-slate-200 font-semibold text-lg hover:bg-slate-300"
-            >
-              <PlusIcon /> Add a Book
-            </Button>
-          </BookDialog>
-        )}
       </div>
     </div>
   );

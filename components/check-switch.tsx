@@ -3,6 +3,7 @@
 import { type RefObject, useEffect, useId, useState } from "react";
 import type { ValidError } from "@/lib/validator";
 import { Checkbox } from "./ui/checkbox";
+import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
 
@@ -17,9 +18,7 @@ type Props = {
 };
 
 /**
- * usage<CheckSwitch type='switch' name='' label='' />
- * @param param0
- * @returns
+ * @ usage <CheckSwitch type='switch' name='' label='xx' />
  */
 export default function CheckSwitch({
   name,
@@ -31,15 +30,18 @@ export default function CheckSwitch({
   setCheckedFunction,
 }: Props) {
   const uid = useId();
+
   const { errors, value } =
     !!error && !!name && error[name] ? error[name] : { errors: [] };
   const [checked, setChecked] = useState(checkValue || !!value);
 
   const Compo = type === "checkbox" ? Checkbox : Switch;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: value not change when 'on'
   useEffect(() => {
-    if (value) setChecked(!!value);
-  }, [value]); // error?
+    if (value) setChecked(true);
+  }, [error]);
+
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -53,17 +55,14 @@ export default function CheckSwitch({
             if (setCheckedFunction) setCheckedFunction(!!checked);
           }}
         />
-        {type === "checkbox" && !!name && (
-          <input
-            type="hidden"
-            name={name}
-            value={checked || !!value ? "on" : ""}
-          />
-        )}
         <Label htmlFor={uid} className="cursor-pointer">
           {label}
         </Label>
+        {type === "checkbox" && !!name && (
+          <Input type="hidden" name={name} value={checked ? "on" : ""} />
+        )}
       </div>
+
       {errors?.map((e) => (
         <p key={e} className="mt-1 text-red-500 text-sm">
           {e}

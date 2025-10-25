@@ -3,6 +3,7 @@ import { use } from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { findMemberByIdWithCount, type MemberWithCount } from "@/lib/db";
 import { DummyProfiieFile } from "@/lib/utils";
+
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 type Props =
@@ -42,7 +43,7 @@ export default function UserAvatar({ id, member, withName }: Props) {
             <div className="w-20">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={mbr.image || DummyProfiieFile} />
-                <AvatarFallback>VC</AvatarFallback>
+                <AvatarFallback>-</AvatarFallback>
               </Avatar>
             </div>
             <div className="space-y-1">

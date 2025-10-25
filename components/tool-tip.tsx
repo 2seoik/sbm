@@ -1,17 +1,39 @@
-import type { PropsWithChildren, ReactNode } from "react";
+"use client";
+
+import { type PropsWithChildren, type ReactNode, useState } from "react";
+import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+
+type Props = {
+  content: ReactNode;
+  variant?: "default" | "destructive";
+  disabled?: boolean;
+};
 
 export default function ToolTip({
   content,
+  variant,
+  disabled,
   children,
-}: PropsWithChildren<{ content: ReactNode }>) {
+}: PropsWithChildren<Props>) {
+  const [isOpen, setOpen] = useState(false);
+
+  const doOpen = (openState: boolean) => {
+    setOpen(disabled ? false : openState);
+  };
+
   return (
-    <Tooltip>
+    <Tooltip open={isOpen} onOpenChange={doOpen}>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       {/* shadcn 을 직접적으로 커스텀하여 사용하는 예시 */}
       <TooltipContent
-        className="bg-red-500"
-        arrowClassName="fill-red-500 bg-red-500"
+        className={cn(
+          "text-white",
+          variant === "destructive" && "bg-destructive"
+        )}
+        arrowClassName={cn(
+          variant === "destructive" && "fill-destructive bg-destructive"
+        )}
       >
         {content}
       </TooltipContent>

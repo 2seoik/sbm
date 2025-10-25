@@ -30,7 +30,7 @@ export const loginNaver = async (redirectTo?: string | null) =>
   login("naver", redirectTo);
 
 export const logout = async () => {
-  await signOut({ redirectTo: "/sign" }); // TODO : 작업끝나고 '/' 로 변경
+  await signOut({ redirectTo: "/" });
 };
 
 // credential 로그인
@@ -103,7 +103,7 @@ export const regist = async (
 
   const { email, nickname, passwd: orgPasswd } = data;
 
-  const existsErr = existsEmail(email);
+  const existsErr = await existsEmail(email);
   if (existsErr) return existsErr;
 
   const passwd = await encryptPassword(orgPasswd);

@@ -50,9 +50,9 @@ export const findMemberById = async (id: string | number) =>
       id: Number(id),
     },
   });
-``;
-export const findMemberByIdWithCount = async (id: string | number) =>
-  await prisma.member.findUnique({
+
+export const findMemberByIdWithCount = async (id: string | number) => {
+  return await prisma.member.findUnique({
     where: {
       id: Number(id),
     },
@@ -65,6 +65,7 @@ export const findMemberByIdWithCount = async (id: string | number) =>
       _count: { select: { Book: true, Mark: true } },
     },
   });
+};
 
 // Book
 export type BookAllColumn = Awaited<ReturnType<typeof findBookWithMarkById>>;
@@ -85,7 +86,13 @@ export const findBookWithMarkById = async (id: number) =>
     where: {
       id,
     },
-    include: { Mark: true },
+    include: {
+      Mark: {
+        include: {
+          _count: { select: { Likes: true, Report: true, Talk: true } },
+        },
+      },
+    },
   });
 
 // 이렇게도 사용하지만 좋지는 않음.
@@ -99,3 +106,22 @@ export const findBookWithMarkById = async (id: number) =>
 //     },
 //     include: { Mark: includeMark },
 //   });
+
+// mark
+export type MarkAllColumn = NonNullable<
+  Awaited<ReturnType<typeof findMarkWithCount>>
+>;
+export type MarkData = Omit<MarkAllColumn, "_count" | "createAt" | "updateAt">;
+export const findMarkWithCount = async (id: number) =>
+  prisma.mark.findUnique({
+    where: { id },
+    include: {
+      _count: {
+        select: {
+          Likes: true,
+          Talk: true,
+          Report: true,
+        },
+      },
+    },
+  });

@@ -1,22 +1,29 @@
 "use client";
 
 import {
-    CircleAlertIcon,
-    CircleQuestionMarkIcon,
-    OctagonXIcon,
-    TriangleAlertIcon
+  CircleAlertIcon,
+  CircleQuestionMarkIcon,
+  OctagonXIcon,
+  TriangleAlertIcon,
 } from "lucide-react";
-import { createContext, type PropsWithChildren, use, useState } from "react";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  createContext,
+  type PropsWithChildren,
+  use,
+  useRef,
+  useState,
+} from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type ContextValueProps = {
@@ -38,6 +45,7 @@ type Options = {
   type?: AlertType;
   okText?: string;
   cancelText?: string;
+  placeholder?: string;
   variant?: "default" | "destructive";
 };
 
@@ -45,6 +53,7 @@ export function AlerterProvider({ children }: PropsWithChildren) {
   const [isOpen, setOpen] = useState(false);
   const [options, setOptions] = useState<Options>();
   const [resolver, setResolver] = useState<(value: string) => void>(() => {});
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // type     destructive             default
   // ------------------------------------------
@@ -52,9 +61,9 @@ export function AlerterProvider({ children }: PropsWithChildren) {
   // alert      Octagon-X           CircleAlert
   // prompt     CircleQuestionMark  CircleQuestionMark
   const variantIcon = () => {
-    if (options?.type === 'prompt') return <CircleQuestionMarkIcon />;
-    if (options?.variant === 'destructive')
-      return options?.type === 'confirm' ? (
+    if (options?.type === "prompt") return <CircleQuestionMarkIcon />;
+    if (options?.variant === "destructive")
+      return options?.type === "confirm" ? (
         <TriangleAlertIcon />
       ) : (
         <OctagonXIcon />
@@ -99,19 +108,32 @@ export function AlerterProvider({ children }: PropsWithChildren) {
               </AlertDialogDescription>
             )}
           </AlertDialogHeader>
+          {options?.type === "prompt" && (
+            <Input
+              type="text"
+              ref={inputRef}
+              placeholder={options?.placeholder}
+            />
+          )}
           <AlertDialogFooter>
             {options?.type !== "alert" && (
               <AlertDialogCancel onClick={() => makeResolver("")}>
-                {options?.cancelText ?? "Cancel"}
+                {options?.cancelText ?? "취소"}
               </AlertDialogCancel>
             )}
             <AlertDialogAction
-              onClick={() => makeResolver("OK")}
+              onClick={() =>
+                makeResolver(
+                  options?.type === "prompt"
+                    ? inputRef.current?.value ?? ""
+                    : "OK"
+                )
+              }
               className={cn(
                 options?.variant === "destructive" && "bg-destructive"
               )}
             >
-              {options?.okText ?? "Continue"}
+              {options?.okText ?? options?.type === "alert" ? "확인" : "진행"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

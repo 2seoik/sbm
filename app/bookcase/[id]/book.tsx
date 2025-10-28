@@ -33,7 +33,7 @@ export default function Book({ id, book }: Props) {
       </h1>
     );
 
-  const { id: bookId, title, remark, ispublic, withdel, member } = data;
+  const { id: bookId, title, ispublic, withdel, member } = data;
   const session = use(auth());
   // 숫자를 감싸는것보다, 문자를감싸는게 유리!
   const isMine = session?.user.id === String(member);
@@ -55,6 +55,9 @@ export default function Book({ id, book }: Props) {
               : "text-muted-foreground text-shadow-gray-300"
           )}
         >
+          {process.env.NODE_ENV === "development" && (
+            <small className="text-muted-foreground">{bookId} : </small>
+          )}
           {!ispublic && <BookKeyIcon />}
           {title}
         </h1>

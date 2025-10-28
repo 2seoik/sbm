@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 import IconLabelButton from "@/components/icon-label-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -26,7 +27,9 @@ export default function Mark({
   withdel: boolean;
   bookOwner: number;
 }) {
-  const { iLikedMarks, iReportedMarks } = useStore();
+  const { iLikedMarks, iReportedMarks, toggleLikes, toggleReports } =
+    useStore();
+
   const router = useRouter();
   const { alert } = useAlerter();
 
@@ -50,6 +53,30 @@ export default function Mark({
     }
   };
 
+  // const likeOrReportsMarks = (
+  //   e: MouseEvent<HTMLButtonElement>,
+  //   type: "likes" | "reports"
+  // ) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+
+  //   type === "likes" ? toggleLikes(mark) : toggleReports(mark);
+  // };
+
+  const likeMarks = (e: MouseEvent<HTMLButtonElement>) => {
+    // 버블링 막기위함
+    e.preventDefault();
+    e.stopPropagation();
+    toggleLikes(mark);
+  };
+
+  const reportsMarks = (e: MouseEvent<HTMLButtonElement>) => {
+    // 버블링 막기위함
+    e.preventDefault();
+    e.stopPropagation();
+    toggleReports(mark);
+  };
+
   return (
     // onclick Button, a
     <div className="group rounded-lg bg-white px-2 pt-2 pb-0.5 shadow-md hover:bg-slate-50 hover:shadow-lg">
@@ -70,6 +97,9 @@ export default function Mark({
 
           <div className="flex flex-col overflow-hidden [&>*]:truncate">
             <h1 className="text-lg dark:text-black/70" title={mark.title}>
+              {process.env.NODE_ENV === "development" && (
+                <small className="text-muted-foreground">{mark.id} : </small>
+              )}
               {mark.title}
             </h1>
             <small className="text-muted-foreground">
@@ -80,31 +110,38 @@ export default function Mark({
             </small>
           </div>
         </div>
+
+        <Separator className="mt-2 mb-0.5 bg-muted-foreground/30" />
+        <div className="flex items-center justify-between text-sm">
+          <IconLabelButton
+            icon={<ThumbsUpIcon />}
+            isActive={iLikedMarks.includes(mark.id)}
+            onClick={(e) => likeMarks(e)}
+          >
+            {mark._count.Likes}
+          </IconLabelButton>
+
+          <IconLabelButton icon={<MessageCircleIcon />}>
+            {mark._count.Talk}
+          </IconLabelButton>
+
+          <IconLabelButton
+            icon={<HatGlassesIcon />}
+            isActive={iReportedMarks.includes(mark.id)}
+            onClick={(e) => reportsMarks(e)}
+            isDanger
+          >
+            {mark._count.Report}
+          </IconLabelButton>
+
+          <IconLabelButton
+            icon={<BookmarkXIcon className="size-5" />}
+            tooltip="바로 삭제"
+            isDanger
+          />
+          <IconLabelButton icon={<MoreHorizontalIcon />} />
+        </div>
       </Link>
-      <Separator className="mt-2 mb-0.5 bg-muted-foreground/30" />
-      <div className="flex items-center justify-between text-sm">
-        <IconLabelButton
-          icon={<ThumbsUpIcon />}
-          isActive={iLikedMarks.includes(mark.id)}
-        >
-          {mark._count.Likes}
-        </IconLabelButton>
-        <IconLabelButton icon={<MessageCircleIcon />}>
-          {mark._count.Talk}
-        </IconLabelButton>
-        <IconLabelButton
-          icon={<HatGlassesIcon />}
-          isDanger={iReportedMarks.includes(mark.id)}
-        >
-          {mark._count.Report}
-        </IconLabelButton>
-        <IconLabelButton
-          icon={<BookmarkXIcon className="size-5" />}
-          tooltip="바로 삭제"
-          isDanger
-        />
-        <IconLabelButton icon={<MoreHorizontalIcon />} />
-      </div>
     </div>
   );
 }

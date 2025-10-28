@@ -82,7 +82,7 @@ export const deleteBook = async (id: number) => {
       }
     });
 
-  const [err, data] = await validateAsync(zobj, { id });
+  const [err] = await validateAsync(zobj, { id });
   if (err) return err;
 
   const { id: userId, isadmin } = session.user;
@@ -98,14 +98,15 @@ export const deleteBook = async (id: number) => {
 };
 
 export const likesAndReports = async (member: number) => {
+  // 메모리 DB로 구성할수있음. cf.redis
   const ilikes = await prisma.likes.findMany({
     where: { member },
-    select: { id: true },
+    select: { mark: true },
   });
 
   const ireports = await prisma.report.findMany({
     where: { member },
-    select: { id: true },
+    select: { mark: true },
   });
 
   return [ilikes, ireports];
@@ -137,4 +138,84 @@ export const deleteMark = async (id: number, bookOwner: number) => {
   await prisma.mark.delete({
     where: { id },
   });
+};
+
+export const toggleLikesMark = async (mark: number) => {
+  const { id: userId } = await checkLogin();
+
+  const member = Number(userId);
+
+  // select count(*) from likes where mark = mark and member=userid
+  const likesCnt = await prisma.likes.count({
+    where: { mark, member },
+  });
+
+  // 만약 select 하는 경우에도 mark_memeber 를 사용해야하는데,
+  // findFirst 했을경우 {mark, memeber} 가능 하지만
+  // findUnique, { mark_member : {mark, member}} 의 unique 값으로 조회해야함
+  // await prisma.likes.findUnique({
+  //   where: { mark_member: { mark, member } },
+  // });
+
+  if (likesCnt > 0) {
+    return await prisma.likes.delete({
+      // where: { mark, member : Number(userId)}, // deleteMany
+      where: { mark_member: { mark, member } },
+    });
+  } else {
+    return await prisma.likes.create({
+      data: { mark, member },
+    });
+  }
+
+  // const likes = await prisma.likes.findMany({
+  //   where: { mark },
+  //   select: { member: true },
+  // });
+};
+
+export const toggleLikesOrReportMark = async (
+  mark: number,
+  type: "likes" | "reports"
+) => {
+  const { id: userId } = await checkLogin();
+  const member = Number(userId);
+
+  // prisma 에서는 2개를 같은 모델로 상속받을 수 없기 때문에 사용할수 없음...컬럼이 항상같다고 단정하기 어렵기 때문
+  // 그리고 type 도 맞춰지지 않음! model의 type을 런타임에 알수 있기 때문에
+  // const model = isLikes ? prisma.likes : prisma.report;
+
+  const isLikes = type === "likes";
+  const data = { mark, member };
+  const where = { where: data };
+  const whereMarkMember = { where: { mark_member: data } };
+
+  // drezzle?
+  // select Member from likes where mark = mark and member = memeber;
+  // const likes = await prisma.likes.findMany({
+  //   where: { mark },
+  //   select: { member: true },
+  // });
+
+  // error 체크를 위함
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  // if (mark === 23) throw new Error("xxxxxxxxx");
+
+  // select count(*) from likes ....
+
+  // isLikes 가 무엇인지 한눈에 들어오지 않기 때문에 다음과 같은 코드를 선호하는 경우도 있음.
+  // const likesCnt = await (type === "likes"....
+  const likesCnt = await (isLikes
+    ? prisma.likes.count(where)
+    : prisma.report.count(where));
+
+  if (likesCnt > 0) {
+    return type === "likes"
+      ? prisma.likes.delete(whereMarkMember)
+      : prisma.report.delete(whereMarkMember);
+  } else {
+    return type === "likes"
+      ? prisma.likes.create({ data })
+      : prisma.report.create({ data });
+  }
 };

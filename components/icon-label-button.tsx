@@ -1,6 +1,6 @@
 "use client";
 
-import type { JSX, PropsWithChildren } from "react";
+import type { JSX, MouseEvent, PropsWithChildren } from "react";
 import { cn } from "@/lib/utils";
 import IconLabel from "./icon-label";
 import ToolTip from "./tool-tip";
@@ -8,10 +8,11 @@ import { Button } from "./ui/button";
 
 type Props = {
   icon: JSX.Element;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
   isActive?: boolean;
   isDanger?: boolean;
   tooltip?: string;
+  disabled?: boolean;
 };
 export default function IconLabelButton({
   icon,
@@ -19,6 +20,7 @@ export default function IconLabelButton({
   isActive,
   isDanger,
   tooltip,
+  disabled,
   children,
 }: PropsWithChildren<Props>) {
   return (
@@ -35,6 +37,7 @@ export default function IconLabelButton({
           isDanger && "text-destructive",
           { "px-2": !children }
         )}
+        disabled={disabled}
       >
         <IconLabel icon={icon} isActive={isActive} isDanger={isDanger}>
           {children}

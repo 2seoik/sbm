@@ -8,32 +8,67 @@ import {
   useEffect,
   useState,
 } from "react";
-import { likesAndReports } from "@/app/bookcase/[id]/book.action";
+import {
+  likesAndReports,
+  toggleLikesOrReportMark,
+} from "@/app/bookcase/[id]/book.action";
+import type { MarkAllColumn } from "@/lib/db";
 
 type ContextValueProps = {
   iLikedMarks: number[];
   iReportedMarks: number[];
+  toggleLikes: (mark: MarkAllColumn) => void;
+  toggleReports: (mark: MarkAllColumn) => void;
   //   setMarks: (likes: number[], reports: number[]) => void;
 };
 
 const StoreContext = createContext<ContextValueProps>({
   iLikedMarks: [],
   iReportedMarks: [],
+  toggleLikes: () => {},
+  toggleReports: () => {},
   //   setMarks: () => {},
 });
 
 export function StoreProvider({ children }: PropsWithChildren) {
-  const [iLikedMarks, setILiked] = useState<number[]>([]);
-  const [iReportedMarks, setReported] = useState<number[]>([]);
+  const [iLikedMarks, setiLikedMarks] = useState<number[]>([]);
+  const [iReportedMarks, setReportedMarks] = useState<number[]>([]);
   const { data: session } = useSession();
 
   // useCallback 함수
   // useMemo
 
   const setMarks = useCallback((likes: number[], reports: number[]) => {
-    setILiked(likes);
-    setReported(reports);
+    setiLikedMarks(likes);
+    setReportedMarks(reports);
   }, []);
+
+  const toggleLikesOrReports = async (
+    mark: MarkAllColumn,
+    type: "likes" | "reports"
+  ) => {
+    const [state, setState] =
+      type === "likes"
+        ? [iLikedMarks, setiLikedMarks]
+        : [iReportedMarks, setReportedMarks];
+
+    const hasNow = state.includes(mark.id);
+
+    // 좋아요, 신고 증가
+    await toggleLikesOrReportMark(mark.id, type);
+
+    if (type === "likes") mark.Likes.length += hasNow ? -1 : +1;
+    else mark.Report.length += hasNow ? -1 : +1;
+
+    if (hasNow) setState(state.filter((id) => id !== mark.id));
+    else setState([...state, mark.id]);
+  };
+
+  const toggleLikes = (mark: MarkAllColumn) =>
+    toggleLikesOrReports(mark, "likes");
+
+  const toggleReports = (mark: MarkAllColumn) =>
+    toggleLikesOrReports(mark, "reports");
 
   useEffect(() => {
     if (session?.user) {
@@ -41,15 +76,17 @@ export function StoreProvider({ children }: PropsWithChildren) {
         // [ [{id:1}, {id: 2} ...]]
         const [likes, reports] = res;
         setMarks(
-          likes.map(({ id }) => id),
-          reports.map(({ id }) => id)
+          likes.map(({ mark }) => mark),
+          reports.map(({ mark }) => mark)
         );
       });
     }
   }, [session?.user, setMarks]);
 
   return (
-    <StoreContext.Provider value={{ iLikedMarks, iReportedMarks }}>
+    <StoreContext.Provider
+      value={{ iLikedMarks, iReportedMarks, toggleLikes, toggleReports }}
+    >
       {children}
     </StoreContext.Provider>
   );

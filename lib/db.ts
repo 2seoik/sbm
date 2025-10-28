@@ -71,7 +71,7 @@ export const findMemberByIdWithCount = async (id: string | number) => {
 export type BookAllColumn = Awaited<ReturnType<typeof findBookWithMarkById>>;
 export type BookData = Omit<
   NonNullable<BookAllColumn>,
-  "Mark" | "createdAt" | "updatedAt"
+  "Mark" | "FollwBook" | "createdAt" | "updatedAt"
 >;
 
 export const findBookId = async (id: number) =>
@@ -87,9 +87,13 @@ export const findBookWithMarkById = async (id: number) =>
       id,
     },
     include: {
+      FollowBook: { select: { member: true } },
       Mark: {
         include: {
-          _count: { select: { Likes: true, Report: true, Talk: true } },
+          // _count: { select: { Likes: true, Report: true, Talk: true } },
+          Likes: { select: { member: true } },
+          Report: { select: { member: true } },
+          Talk: true,
         },
       },
     },
@@ -112,16 +116,20 @@ export type MarkAllColumn = NonNullable<
   Awaited<ReturnType<typeof findMarkWithCount>>
 >;
 export type MarkData = Omit<MarkAllColumn, "_count" | "createAt" | "updateAt">;
+
 export const findMarkWithCount = async (id: number) =>
   prisma.mark.findUnique({
     where: { id },
     include: {
-      _count: {
-        select: {
-          Likes: true,
-          Talk: true,
-          Report: true,
-        },
-      },
+      // _count: {
+      //   select: {
+      //     Likes: true,
+      //     Talk: true,
+      //     Report: true,
+      //   },
+      // },
+      Likes: { select: { member: true } },
+      Report: { select: { member: true } },
+      Talk: true,
     },
   });

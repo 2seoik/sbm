@@ -21,6 +21,7 @@ export default function BookCaseNickname({ params }: Props) {
   const { id } = use(params); // params 이기 떄문에 string
   const session = use(auth());
   const isMyBookcase = !!session?.user;
+  const userId = session?.user.id;
   // const isMyBookcase = !!session?.user && session.user.id === id;
   const mbr = use(findMemberByIdWithCount(id));
   if (!mbr) return <h1 className="text-2xl">사용자가 없습니다.</h1>;
@@ -29,14 +30,24 @@ export default function BookCaseNickname({ params }: Props) {
     prisma.book.findMany({
       where: { member: Number(id) },
       include: {
+        FollowBook: { select: { member: true } },
         Mark: {
           include: {
-            _count: { select: { Likes: true, Report: true, Talk: true } },
+            // _count: { select: { Likes: true, Report: true, Talk: true } },
+            Likes: { select: { member: true } },
+            Report: { select: { member: true } },
+            Talk: true,
           },
         },
       },
     })
   );
+
+  // books.forEach(book => {
+  //   book.Mark.forEach(mark => {
+  //     mark.iliked = mark.Likes.map((like) => like.memeber).includes(userId)
+  //   })
+  // })
 
   return (
     <div className="flex max-h-full flex-col pt-2">

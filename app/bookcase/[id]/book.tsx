@@ -40,7 +40,7 @@ export default function Book({ id, book }: Props) {
 
   // server 컴포넌트이기 때문에 가능
   const totalLikesCnt = book?.Mark.reduce(
-    (acc, mark) => acc + mark._count.Likes,
+    (acc, mark) => acc + mark.Likes.length,
     0
   );
 
@@ -55,6 +55,7 @@ export default function Book({ id, book }: Props) {
               : "text-muted-foreground text-shadow-gray-300"
           )}
         >
+          {process.env.NODE_ENV === "development" && <small>{bookId}</small>}
           {!ispublic && <BookKeyIcon />}
           {title}
         </h1>
@@ -115,10 +116,10 @@ export default function Book({ id, book }: Props) {
             {/* Mark 갯수 */}
             <IconLabel icon={<AlbumIcon />}>{book?.Mark.length}</IconLabel>
 
-            {/* Mark 좋아요 갯수 */}
+            {/* Mark 팔로우 갯수 */}
             {ispublic && (
               <IconLabel icon={<HeartPlusIcon className="text-red-400" />}>
-                {totalLikesCnt}
+                {book?.FollowBook.length}
                 {/* 한눈에 값을 확인할수 있기 때문에 아래와 같이 하는 경우도 있음 */}
                 {/* {book?.Mark.reduce((acc, mark) => acc + mark._count.Likes, 0)} */}
               </IconLabel>

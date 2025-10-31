@@ -91,6 +91,7 @@ export const encryptPassword = async (passwd: string) => hash(passwd, 10);
 
 export const existsFile = (filePath: string | undefined | null) => {
   if (!filePath || filePath.startsWith("http")) return filePath;
+
   const fullPath = path.join(process.cwd(), "public", filePath);
   return existsSync(fullPath) ? filePath : null;
 };

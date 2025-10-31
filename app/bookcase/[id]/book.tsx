@@ -39,10 +39,10 @@ export default function Book({ id, book }: Props) {
   const isMine = session?.user.id === String(member);
 
   // server 컴포넌트이기 때문에 가능
-  const totalLikesCnt = book?.Mark.reduce(
-    (acc, mark) => acc + mark.Likes.length,
-    0
-  );
+  // const totalLikesCnt = book?.Mark.reduce(
+  //   (acc, mark) => acc + mark.Likes.length,
+  //   0
+  // );
 
   return (
     <div className="flex w-72 flex-shrink-0 flex-col justify-start rounded-lg bg-slate-200 pl-2 dark:bg-muted">
@@ -116,7 +116,7 @@ export default function Book({ id, book }: Props) {
             {/* Mark 갯수 */}
             <IconLabel icon={<AlbumIcon />}>{book?.Mark.length}</IconLabel>
 
-            {/* Mark 팔로우 갯수 */}
+            {/* 북 팔로우 갯수 */}
             {ispublic && (
               <IconLabel icon={<HeartPlusIcon className="text-red-400" />}>
                 {book?.FollowBook.length}

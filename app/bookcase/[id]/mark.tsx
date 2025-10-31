@@ -29,18 +29,15 @@ export default function Mark({
 }) {
   const { data: session } = useSession();
   const userId = Number(session?.user.id);
-  // const [likes, setLikes] = useState(() => mark.Likes);
-  const [likes, setLikes] = useOptimistic(mark.Likes);
+  const [likes, setLikes] = useOptimistic(mark.Likes); // ((pre) => {}) dispatch 함수스타일도 가능
   const [reports, setReports] = useOptimistic(mark.Report);
-
   const [isPending, startTransition] = useTransition();
-  // const { iLikedMarks, iReportedMarks, toggleLikes, toggleReports } = useStore();
+
   const router = useRouter();
   const { alert } = useAlerter();
 
   const iLiked = () => likes.map(({ member }) => member).includes(userId);
-  const iReported = () =>
-    mark.Report.map((like) => like.member).includes(userId);
+  const iReported = () => reports.map(({ member }) => member).includes(userId);
 
   const likeOrReportMark = (
     e: MouseEvent<HTMLButtonElement>,
@@ -48,7 +45,6 @@ export default function Mark({
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    // toggleLikes(mark);
 
     const hasNow = type === "likes" ? iLiked() : iReported();
     const state = type === "likes" ? likes : reports;
@@ -60,32 +56,30 @@ export default function Mark({
 
     startTransition(async () => {
       try {
-        if (iLiked()) {
+        if (hasNow) {
           // mark.Likes = mark.Likes.filter((like) => like.member !== userId);
           setAction(state.filter(({ member }) => member !== userId));
         } else {
-          // mark.Likes = [...mark.Likes, { member: userId }];
           // mark.Likes.push({ member: userId });
-          setAction([...likes, { member: userId }]);
           // mark.Likes = [...mark.Likes, { member: userId }];
+          setAction([...state, { member: userId }]);
         }
+
+        await toggleLikesOrReportMark(mark.id, type);
 
         if (type === "likes") mark.Likes = dbData;
         else mark.Report = dbData;
-
-        await toggleLikesOrReportMark(mark.id, "likes");
-      } catch (error) {
-        if (error instanceof Error) alert({ title: error.message });
-        else alert({ title: JSON.stringify(error) });
+      } catch (err) {
+        if (err instanceof Error) alert({ title: err.message });
+        else alert({ title: JSON.stringify(err) });
       }
     });
   };
 
-  const reportMark = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // toggleReports(mark);
-  };
+  const likeMark = (e: MouseEvent<HTMLButtonElement>) =>
+    likeOrReportMark(e, "likes");
+  const reportMark = () => (e: MouseEvent<HTMLButtonElement>) =>
+    likeOrReportMark(e, "reports");
 
   const openLinkTrigger = async () => {
     // console.log("🚀 ~ mark.tsx ~ mark.id:", mark.id);
@@ -96,9 +90,7 @@ export default function Mark({
     //   !iLikedMarks.includes(mark.id)
     // );
 
-    if (withdel && mark.Likes.length) return;
-
-    console.log("🚀 ~ mark.tsx ~ mark.id:", mark.id);
+    if (!withdel || mark.Likes.length) return;
 
     try {
       await deleteMark(mark.id, bookOwner);
@@ -144,30 +136,35 @@ export default function Mark({
       </Link>
       <Separator className="mt-2 mb-0.5 bg-muted-foreground/30" />
       <div className="flex items-center justify-between text-sm">
+        {/* 좋아요 */}
         <IconLabelButton
           icon={<ThumbsUpIcon />}
-          // onClick={likeMark}
-          onClick={(e) => likeOrReportMark(e, "likes")}
-          // isActive={iLikedMarks.includes(mark.id)}
+          // onClick={(e) => likeOrReportMark(e, "likes")}
+          onClick={likeMark}
           isActive={iLiked()}
           disabled={isPending}
         >
-          {/* {mark._count.Likes}:  */}
           {likes.length}
         </IconLabelButton>
+
+        {/* 채팅 */}
         <IconLabelButton icon={<MessageCircleIcon />}>
-          {/* {mark._count.Talk} : */}
-          {mark.Report.length}
+          {mark.Talk.length}
         </IconLabelButton>
+
+        {/* 신고 */}
         <IconLabelButton
           icon={<HatGlassesIcon />}
-          onClick={(e) => likeOrReportMark(e, "reports")}
-          isDanger={iReported()}
+          // onClick={(e) => likeOrReportMark(e, "reports")}
+          onClick={reportMark}
+          isActive={iReported()}
           disabled={isPending}
+          isDanger
         >
-          {/* {mark._count.Report} */}
-          {mark.Report.length}
+          {reports.length}
         </IconLabelButton>
+
+        {/* 삭제 */}
         <IconLabelButton
           icon={<BookmarkXIcon className="size-5" />}
           tooltip="바로 삭제"

@@ -144,6 +144,7 @@ export const toggleLikesOrReportMark = async (
   mark: number,
   type: "likes" | "reports"
 ) => {
+  // error 체크를 위함
   const { id: userId } = await checkLogin();
   const member = Number(userId);
 
@@ -157,16 +158,16 @@ export const toggleLikesOrReportMark = async (
   const where = { where: data };
   const whereMarkMember = { where: { mark_member: data } };
 
+  // error 테스트
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  // throw new Error("XXXXXXXXXX");
+
   // drezzle?
   // select Member from likes where mark = mark and member = memeber;
   // const likes = await prisma.likes.findMany({
   //   where: { mark },
   //   select: { member: true },
   // });
-
-  // error 체크를 위함
-  // await new Promise((resolve) => setTimeout(resolve, 2000));
-  // if(mark === 19) throw new Error("xxxxxxxxx");
 
   // select count(*) from likes ....
   //  await (type === "likes" ....

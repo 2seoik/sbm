@@ -1,9 +1,8 @@
 import { LogInIcon, SquareLibrary } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { use } from "react";
+import UserAvatar from "@/components/user-avatar";
 import { auth } from "@/lib/auth";
-import { DummyProfiie } from "@/lib/utils";
 import { existsFile } from "@/lib/validator";
 
 export default function Nav() {
@@ -19,14 +18,21 @@ export default function Nav() {
         // 'session.user?.name
         <Link
           href="/my"
-          className="relative h-[40px] w-[40px] overflow-hidden rounded-full border"
+          className="relative overflow-hidden rounded-full border"
         >
-          <Image
+          <UserAvatar
+            member={{
+              id: Number(session.user.id),
+              nickname: session.user.name || "",
+              image: existsFile(session.user?.image),
+            }}
+          />
+          {/* <Image
             src={existsFile(session.user?.image) || DummyProfiie}
             alt={session.user?.name || "guest"}
             unoptimized={process.env.NODE_ENV === "development"}
             fill
-          />
+          /> */}
         </Link>
       ) : (
         <Link href="/sign" className="btn-icon">

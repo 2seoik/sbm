@@ -16,8 +16,8 @@ export default function Sign({ searchParams }: Props) {
   const { redirectTo } = use(searchParams);
 
   return (
-    <div className="container mx-auto grid h-full place-items-center px-10">
-      <div className="flex w-full overflow-hidden rounded-lg border shadow-md [&>div]:p-4">
+    <div className="container mx-auto mt-16 grid h-full max-w-[700px] place-items-center">
+      <div className="flex w-full flex-col-reverse overflow-hidden rounded-md border shadow-md sm:flex-row [&>div]:p-4">
         <div className="flex-1">
           <div className="flex items-center gap-5">
             <h1 className="font-semibold text-2xl tracking-tighter">
@@ -34,6 +34,7 @@ export default function Sign({ searchParams }: Props) {
           <Divider label="or" />
           <SignForm />
         </div>
+
         <div className="flex-1 bg-zinc-800 text-white">
           <div className="flex h-full flex-col justify-around">
             <div>

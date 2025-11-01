@@ -1,9 +1,33 @@
 "use server";
 
+import { revalidateTag, unstable_cache } from "next/cache";
 import z from "zod";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { validate, validateAsync } from "@/lib/validator";
+
+export const getAllBooksByMember = async (member: number) =>
+  unstable_cache(
+    async () => {
+      // console.log("******* getAllBooksByMember>>", member);
+      return prisma.book.findMany({
+        where: { member },
+        include: {
+          FollowBook: { select: { member: true } },
+          Mark: {
+            include: {
+              Likes: { select: { member: true } },
+              Report: { select: { member: true } },
+              Talk: true,
+              Member: { select: { id: true, image: true, nickname: true } },
+            },
+          },
+        },
+      });
+    },
+    [`member-books-${member}`], // ! cache-key
+    { tags: [`member-books-${member}`] } // options
+  )();
 
 export const saveBook = async (formData: FormData) => {
   const session = await auth();
@@ -11,7 +35,7 @@ export const saveBook = async (formData: FormData) => {
 
   const member = Number(session.user.id);
 
-  console.log("🚀 ~ formData:", Object.fromEntries(formData.entries()));
+  // console.log("🚀 ~ formData:", Object.fromEntries(formData.entries()));
 
   const zobj = z
     .object({
@@ -48,7 +72,6 @@ export const saveBook = async (formData: FormData) => {
       },
     });
   } else {
-    console.log(">>>>>> create book");
     await prisma.book.create({
       data: {
         ...data,
@@ -58,6 +81,8 @@ export const saveBook = async (formData: FormData) => {
       },
     });
   }
+
+  revalidateTag(`member-books-${member}`);
 };
 
 export const deleteBook = async (id: number) => {
@@ -95,6 +120,8 @@ export const deleteBook = async (id: number) => {
           member: Number(userId),
         },
   });
+
+  revalidateTag(`member-books-${Number(userId)}`);
 };
 
 export const likesAndReports = async (member: number) => {
@@ -138,11 +165,14 @@ export const deleteMark = async (id: number, bookOwner: number) => {
   await prisma.mark.delete({
     where: { id },
   });
+
+  revalidateTag(`member-books-${bookOwner}`);
 };
 
 export const toggleLikesOrReportMark = async (
   mark: number,
-  type: "likes" | "reports"
+  type: "likes" | "reports",
+  bookOwner: number
 ) => {
   // error 체크를 위함
   const { id: userId } = await checkLogin();
@@ -176,16 +206,38 @@ export const toggleLikesOrReportMark = async (
     : prisma.report.count(where));
 
   if (likesCnt > 0) {
-    return type === "likes"
-      ? prisma.likes.delete(whereMarkMember)
-      : prisma.report.delete(whereMarkMember);
+    type === "likes"
+      ? await prisma.likes.delete(whereMarkMember)
+      : await prisma.report.delete(whereMarkMember);
   } else {
-    return type === "likes"
-      ? prisma.likes.create({
+    type === "likes"
+      ? await prisma.likes.create({
           data,
         })
-      : prisma.report.create({
+      : await prisma.report.create({
           data,
         });
   }
+
+  revalidateTag(`member-books-${bookOwner}`);
+};
+
+export const toggleFollowBook = async (book: number, bookOwner: number) => {
+  const { id } = await checkLogin();
+  const member = Number(id);
+  const fb = await prisma.followBook.findUnique({
+    where: { book_member: { book, member } },
+  });
+
+  if (fb)
+    await prisma.followBook.delete({
+      where: { book_member: { book, member } },
+    });
+  else
+    await prisma.followBook.create({
+      data: { book, member },
+    });
+
+  revalidateTag(`member-books-${bookOwner}`);
+  // revalidatePath(`/bookcase/${bookOwner}`);
 };

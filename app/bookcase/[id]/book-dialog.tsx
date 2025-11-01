@@ -37,22 +37,27 @@ export default function BookDialog({
 }>) {
   const router = useRouter();
   const { confirm, alert, prompt } = useAlerter();
+
   // const [ispublic, setPublic] = useState(false);
   // const [withdel, setWithdel] = useState(false);
   const [isOpen, setOpen] = useState(false);
+
   const [validError, save, isPending] = useActionState(
     async (_prev: ValidError | undefined, formData: FormData) => {
       // formData.set("ispublic", ispublic ? "on" : "");
       // formData.set("withdel", withdel ? "on" : "");
 
+      // id 가 있는경우 수정처리
       formData.set("id", String(book.id));
       // console.log(">>>>>>", Object.fromEntries(formData.entries()));
       const err = await saveBook(formData);
       if (err) {
         return err;
       }
-      router.refresh();
+
       setOpen(false);
+      //
+      // router.refresh();
     },
     undefined
   );
@@ -83,7 +88,9 @@ export default function BookDialog({
       return;
     }
 
-    router.refresh();
+    //
+    // router.refresh();
+
     setOpen(false);
   };
 

@@ -94,6 +94,7 @@ export const findBookWithMarkById = async (id: number) =>
           Likes: { select: { member: true } },
           Report: { select: { member: true } },
           Talk: true,
+          Member: { select: { id: true, image: true, nickname: true } },
         },
       },
     },
@@ -125,5 +126,6 @@ export const findMarkWithCount = async (id: number) =>
       Likes: { select: { member: true } },
       Report: { select: { member: true } },
       Talk: true,
+      Member: { select: { id: true, image: true, nickname: true } },
     },
   });

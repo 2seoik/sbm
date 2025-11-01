@@ -5,7 +5,7 @@ import {
   HeartPlusIcon,
   MoreHorizontalIcon,
   PlusIcon,
-  UserRoundPlusIcon,
+  ThumbsUpIcon,
 } from "lucide-react";
 import { use } from "react";
 import IconLabel from "@/components/icon-label";
@@ -15,6 +15,7 @@ import { auth } from "@/lib/auth";
 import { type BookAllColumn, findBookWithMarkById } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import BookDialog from "./book-dialog";
+import FollowButton from "./follow-button";
 import Mark from "./mark";
 
 type Props =
@@ -33,11 +34,20 @@ export default function Book({ id, book }: Props) {
       </h1>
     );
 
-  const { id: bookId, title, remark, ispublic, withdel, member } = data;
+  const {
+    id: bookId,
+    title,
+    remark,
+    ispublic,
+    withdel,
+    member,
+    Mark: marks,
+    FollowBook: followBooks,
+  } = data;
   const session = use(auth());
   // 숫자를 감싸는것보다, 문자를감싸는게 유리!
   const isMine = session?.user.id === String(member);
-
+  const loginUserId = Number(session?.user.id);
   // server 컴포넌트이기 때문에 가능
   // const totalLikesCnt = book?.Mark.reduce(
   //   (acc, mark) => acc + mark.Likes.length,
@@ -45,7 +55,7 @@ export default function Book({ id, book }: Props) {
   // );
 
   return (
-    <div className="flex w-72 flex-shrink-0 flex-col justify-start rounded-lg bg-slate-200 pl-2 dark:bg-muted">
+    <div className="flex h-full w-72 flex-shrink-0 flex-col rounded-lg bg-slate-200 pl-2 dark:bg-muted">
       <div className="flex items-center justify-between pr-2">
         <h1
           className={cn(
@@ -54,12 +64,15 @@ export default function Book({ id, book }: Props) {
               ? "text-green-500 text-shadow-green-300"
               : "text-muted-foreground text-shadow-gray-300"
           )}
+          title={remark || title}
         >
-          {process.env.NODE_ENV === "development" && <small>{bookId}</small>}
-          {!ispublic && <BookKeyIcon />}
-          {title}
+          {process.env.NODE_ENV === "development" && (
+            <small className="text-muted-foreground">{bookId}</small>
+          )}
+          {!ispublic && <BookKeyIcon className="inline" />} {title}
         </h1>
 
+        {/* // Book 수정 */}
         {isMine ? (
           <BookDialog book={book}>
             <Button
@@ -71,30 +84,30 @@ export default function Book({ id, book }: Props) {
           </BookDialog>
         ) : (
           ispublic && (
-            <Button
-              variant={"ghost"}
-              className="font-semibold text-lg hover:bg-slate-300"
+            // Book 팔로우 버튼
+            <FollowButton
+              bookId={bookId}
+              bookOwner={member}
+              isActive={followBooks
+                .map(({ member }) => member)
+                .includes(loginUserId)}
             >
-              <IconLabel
-                icon={<UserRoundPlusIcon className="text-green-500" />}
-                noti={"success"}
-              >
-                <small>50</small>
-              </IconLabel>
-            </Button>
+              {followBooks.length}
+            </FollowButton>
           )
         )}
       </div>
 
-      {/* Mark group */}
+      {/* mark group */}
       <div className="max-h-full space-y-2 overflow-y-scroll pr-2 pb-3">
-        {book?.Mark.length ? (
-          book?.Mark.map((mark) => (
+        {marks.length ? (
+          marks.map((mark) => (
             <Mark
               key={mark.id}
               mark={mark}
               withdel={withdel}
-              bookOwner={book.member}
+              bookOwner={member}
+              followBooks={book?.FollowBook.length}
             />
           ))
         ) : (
@@ -103,7 +116,6 @@ export default function Book({ id, book }: Props) {
           </h1>
         )}
       </div>
-
       {isMine && (
         <div className="my-1 flex items-center justify-between pr-2 font-medium">
           <Button
@@ -114,12 +126,18 @@ export default function Book({ id, book }: Props) {
           </Button>
           <div className="flex gap-2">
             {/* Mark 갯수 */}
-            <IconLabel icon={<AlbumIcon />}>{book?.Mark.length}</IconLabel>
+            <IconLabel icon={<AlbumIcon />}>{marks.length}</IconLabel>
 
+            <IconLabel noti={"success"} icon={<ThumbsUpIcon className="" />}>
+              {marks.reduce((acc, mark) => acc + mark.Likes.length, 0)}
+            </IconLabel>
             {/* 북 팔로우 갯수 */}
             {ispublic && (
-              <IconLabel icon={<HeartPlusIcon className="text-red-400" />}>
-                {book?.FollowBook.length}
+              <IconLabel
+                noti={"destructive"}
+                icon={<HeartPlusIcon className="text-red-400" />}
+              >
+                {followBooks.length}
                 {/* 한눈에 값을 확인할수 있기 때문에 아래와 같이 하는 경우도 있음 */}
                 {/* {book?.Mark.reduce((acc, mark) => acc + mark._count.Likes, 0)} */}
               </IconLabel>

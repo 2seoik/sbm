@@ -55,7 +55,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
     const hasNow = state.includes(mark.id);
 
     // 좋아요, 신고 증가
-    await toggleLikesOrReportMark(mark.id, type);
+    // TODO : 임시로 bookOwner값을 mark.maker 로 줌
+    await toggleLikesOrReportMark(mark.id, type, mark.maker);
 
     if (type === "likes") mark.Likes.length += hasNow ? -1 : +1;
     else mark.Report.length += hasNow ? -1 : +1;

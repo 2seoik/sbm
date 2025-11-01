@@ -29,7 +29,8 @@ export default function Mark({
 }) {
   const { data: session } = useSession();
   const userId = Number(session?.user.id);
-  const [likes, setLikes] = useOptimistic(mark.Likes); // ((pre) => {}) dispatch 함수스타일도 가능
+  // useOptimistic(state, (_prev, optimisticValue) => { ... })  형태로 도 사용가능
+  const [likes, setLikes] = useOptimistic(mark.Likes);
   const [reports, setReports] = useOptimistic(mark.Report);
   const [isPending, startTransition] = useTransition();
 
@@ -52,7 +53,7 @@ export default function Mark({
     const col = type === "likes" ? mark.Likes : mark.Report;
     const dbData = hasNow
       ? col.filter(({ member }) => member !== userId)
-      : [...mark.Likes, { member: userId }];
+      : [...col, { member: userId }];
 
     startTransition(async () => {
       try {
@@ -78,7 +79,7 @@ export default function Mark({
 
   const likeMark = (e: MouseEvent<HTMLButtonElement>) =>
     likeOrReportMark(e, "likes");
-  const reportMark = () => (e: MouseEvent<HTMLButtonElement>) =>
+  const reportMark = (e: MouseEvent<HTMLButtonElement>) =>
     likeOrReportMark(e, "reports");
 
   const openLinkTrigger = async () => {

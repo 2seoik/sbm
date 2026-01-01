@@ -19,6 +19,7 @@ import { useAlerter } from "@/hooks/contexts/alerter";
 import type { MarkAllColumn } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { deleteMark, toggleLikesOrReportMark } from "./book.action";
+import MarkDialog from "./mark-dialog";
 
 export default function Mark({
   mark,
@@ -98,7 +99,10 @@ export default function Mark({
   const reportMark = (e: MouseEvent<HTMLButtonElement>) =>
     likeOrReportMark(e, "reports");
 
-  const openLinkTrigger = async () => {
+  const openLinkTrigger = async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     // '좋아요' 한 mark는 삭제에서 제외!
     if (!withdel || mark.Likes.length) return;
 
@@ -224,7 +228,9 @@ export default function Mark({
               disabled={isRemovePending}
               isDanger
             />
-            <IconLabelButton icon={<MoreHorizontalIcon />} />
+            <MarkDialog mark={mark}>
+              <IconLabelButton icon={<MoreHorizontalIcon />} />
+            </MarkDialog>
           </>
         )}
       </div>

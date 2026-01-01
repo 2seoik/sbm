@@ -145,7 +145,17 @@ const checkLogin = async () => {
   return session.user;
 };
 
-export const deleteMark = async (id: number, bookOwner: number) => {
+export const deleteMarkWithBookId = async (markId: number, bookId: number) => {
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+  });
+
+  if (!book) throw new Error("존재하지 않는 Book 입니다.");
+
+  return deleteMark(markId, book.member);
+};
+
+export const deleteMark = async (id: number, bookOwner?: number) => {
   const { id: userId, isadmin } = await checkLogin();
 
   // check exists
@@ -154,8 +164,13 @@ export const deleteMark = async (id: number, bookOwner: number) => {
   });
   if (!mark) throw new Error("존재하지 않는 Mark 입니다.");
 
-  if (!isadmin && Number(userId) !== bookOwner && mark.maker !== Number(userId))
-    throw new Error("삭제 권한이 없습니다.");
+  if (!bookOwner)
+    if (
+      !isadmin &&
+      Number(userId) !== bookOwner &&
+      mark.maker !== Number(userId)
+    )
+      throw new Error("삭제 권한이 없습니다.");
 
   // if (!mark)
   //   throw new Error(
@@ -240,4 +255,60 @@ export const toggleFollowBook = async (book: number, bookOwner: number) => {
 
   revalidateTag(`member-books-${bookOwner}`);
   // revalidatePath(`/bookcase/${bookOwner}`);
+};
+
+export const saveMark = async (formData: FormData) => {
+  const { id: userId, isadmin } = await checkLogin();
+  const maker = Number(userId);
+  console.log(
+    "🚀 saveMark - formData:",
+    Object.fromEntries(formData.entries())
+  );
+
+  const bookId = Number(formData.get("book"));
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+  });
+  // if (!book) return { book: { errors: ["This book is not exists!"], value: bookId } };
+
+  const zobj = z
+    .object({
+      link: z.string().min(1).max(1024),
+      title: z.string().min(1).max(120),
+      image: z.string().optional(),
+      descript: z.string().optional(),
+    })
+    .refine(() => !!book, {
+      path: ["book"],
+      message: `${book} : Book 이 존재하지 않습니다.`,
+    });
+
+  const [err, data] = validate(zobj, formData);
+
+  // * `!book?.id` is for TS
+  if (err || !book?.id) {
+    console.log("🚀 saveMar - err:", err, data);
+    return err;
+  }
+
+  const id = Number(formData.get("id"));
+  console.log("🚀 formData.mark.id:", id);
+  const isBookOwner = book.member === maker;
+
+  if (id) {
+    await prisma.mark.update({
+      where: isadmin || isBookOwner ? { id } : { id, maker },
+      data,
+    });
+  } else {
+    await prisma.mark.create({
+      data: {
+        ...data,
+        book: book.id,
+        maker,
+      },
+    });
+  }
+
+  revalidateTag(`member-books-${maker}`);
 };

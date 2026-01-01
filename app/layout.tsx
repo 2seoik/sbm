@@ -1,24 +1,27 @@
-import { BookMarkedIcon } from "lucide-react";
+import { ArrowRightIcon, BookMarkedIcon, GlobeIcon, SparklesIcon } from "lucide-react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { Inter, Sora } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
-import ThemeChanger from "@/components/theme-changer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AlerterProvider } from "@/hooks/contexts/alerter";
 import { StoreProvider } from "@/hooks/contexts/store";
 import { auth } from "@/lib/auth";
 import "./globals.css";
+import Footer from "@/components/footer";
+import Header from "@/components/header";
+import { Button } from "@/components/ui/button";
 import Nav from "./nav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sora = Sora({
   subsets: ["latin"],
+  variable: "--font-sora",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -34,38 +37,15 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} ${sora.variable} antialiased`}>
         <SessionProvider session={session}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AlerterProvider>
               <StoreProvider>
-                <div className="flex h-screen flex-col justify-center">
-                  <header className="flex justify-between border border-b-4 border-b-amber-500 px-1">
-                    <Link
-                      href="/"
-                      className="flex items-center font-semibold text-3xl text-zinc-800 tracking-tight"
-                    >
-                      <BookMarkedIcon size={28} />
-                      Book & Mark
-                    </Link>
-                    <Nav />
-                  </header>
-                  <main className="flex-1 overflow-auto px-2">{children}</main>
-                  <footer className="mb-1">
-                    <div className="flex justify-between">
-                      <div className="text-zinc-500">&#169; shlee 2025</div>
-                      <div>
-                        <ThemeChanger />
-                      </div>
-                    </div>
-                  </footer>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <div>{children}</div>
+                  <Footer />
                 </div>
               </StoreProvider>
             </AlerterProvider>

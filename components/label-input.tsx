@@ -1,12 +1,8 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: useEffect Dependency-array */
 "use client";
-import {
-  type ComponentProps,
-  type RefObject,
-  useEffect,
-  useId,
-  useRef,
-} from "react";
+import type { Icon } from "@tabler/icons-react";
+import type { LucideIcon } from "lucide-react";
+import { type ComponentProps, cloneElement, type JSX, type RefObject, useEffect, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type { ValidError } from "@/lib/validator";
 import { Input } from "./ui/input";
@@ -22,6 +18,7 @@ export type LabelInputProps = {
   className?: string;
   inputClassName?: string;
   ref?: RefObject<HTMLInputElement | null>;
+  icon?: LucideIcon;
 };
 export default function LabelInput({
   label,
@@ -34,13 +31,13 @@ export default function LabelInput({
   className,
   inputClassName,
   ref,
+  icon: Icon,
   ...props
 }: LabelInputProps & ComponentProps<"input">) {
   const uniqueName = useId();
   const inpRef = useRef<HTMLInputElement>(null);
   const err = !!error && !!name && error[name] ? error[name].errors : [];
-  const val =
-    !!error && !!name && error[name] ? error[name].value?.toString() : "";
+  const val = !!error && !!name && error[name] ? error[name].value?.toString() : "";
 
   useEffect(() => {
     if (!focus && !err.length) return;
@@ -53,9 +50,14 @@ export default function LabelInput({
   }, [err]);
 
   return (
-    <div className={cn(className)}>
+    <div className={cn("space-y-1", className)}>
       <label htmlFor={uniqueName} className="font-semibold text-sm capitalize">
         {label}
+      </label>
+      <div className="relative">
+        {Icon && (
+          <Icon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 h-5 w-5 text-muted-foreground" />
+        )}
         <Input
           type={type || "text"}
           id={uniqueName}
@@ -64,17 +66,18 @@ export default function LabelInput({
           placeholder={placeholder || ""}
           defaultValue={val || defaultValue || ""}
           className={cn(
-            "bg-gray-100 font-normal focus:bg-white",
-            inputClassName
+            "h-12 border-border/50 bg-secondary/50 focus:border-primary",
+            Icon ? "pl-10" : "",
+            inputClassName,
           )}
           {...props}
         />
-        {err.map((e) => (
-          <span key={e} className="font-medium text-red-500">
-            {e}
-          </span>
-        ))}
-      </label>
+      </div>
+      {err.map((e) => (
+        <span key={e} className="font-medium text-red-500">
+          {e}
+        </span>
+      ))}
     </div>
   );
 }

@@ -29,13 +29,7 @@ export type ImageUploaderHandler = {
   getSrc: () => string | Blob | undefined;
 };
 
-export default function ImageUploader({
-  src,
-  alt,
-  changeImage,
-  isNotProfile,
-  ref,
-}: Props) {
+export default function ImageUploader({ src, alt, changeImage, isNotProfile, ref }: Props) {
   const router = useRouter();
   const { update } = useSession();
 
@@ -84,9 +78,7 @@ export default function ImageUploader({
       if (isNotProfile) {
         changeImage(formData);
       } else {
-        const [err, mbr] = (await changeImage(
-          formData
-        )) as Awaited<UpdateProfileImageReturn>;
+        const [err, mbr] = (await changeImage(formData)) as Awaited<UpdateProfileImageReturn>;
         // const [err, mbr] = await changeImage(formData);
 
         if (err) {
@@ -128,18 +120,15 @@ export default function ImageUploader({
           formData.append("image", files[0]);
           uploadImage(formData);
         }}
-        className={cn(
-          "relative aspect-square w-full cursor-pointer rounded-full border-2 shadow-md",
-          {
-            "border-blue-500 border-dotted": isDragging,
-          }
-        )}
+        className={cn("relative aspect-square w-full cursor-pointer rounded-full border-2 shadow-md", {
+          "border-blue-500 border-dotted": isDragging,
+        })}
       >
         <Img
           src={img}
           alt={alt || ""}
           onClick={() => fileRef.current?.click()}
-          className="w-full rounded-full border object-cover"
+          className="h-32 w-32 rounded-full border-primary/20 object-cover sm:h-40 sm:w-40"
           onError={() => setImg(dummyImage)}
         />
         <input

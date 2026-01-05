@@ -1,13 +1,7 @@
 "use client";
 
 import { CheckLineIcon, Undo2Icon } from "lucide-react";
-import {
-  type ComponentProps,
-  type FormEvent,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { type ComponentProps, type FormEvent, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import type { ValidError } from "@/lib/validator";
 import type { LabelInputProps } from "./label-input";
@@ -54,7 +48,7 @@ export default function LabelEdit({
     startTransition(async () => {
       const err = await saveAction(formData);
       if (err) {
-        setValidError(error);
+        setValidError(err);
       } else setDirty(false);
     });
   };
@@ -68,11 +62,7 @@ export default function LabelEdit({
   //   };
 
   return (
-    <form
-      onSubmit={submitHandler}
-      onResetCapture={() => setDirty(false)}
-      className="flex gap-3"
-    >
+    <form onSubmit={submitHandler} onResetCapture={() => setDirty(false)} className="flex gap-3">
       <LabelInput
         label={label}
         type={type}
@@ -95,7 +85,7 @@ export default function LabelEdit({
           <Button type="reset" variant={"outline"}>
             <Undo2Icon />
           </Button>
-          <Button type="submit" variant={"primary"} disabled={isPending}>
+          <Button type="submit" variant={"hero"} disabled={isPending}>
             <CheckLineIcon />
           </Button>
         </div>

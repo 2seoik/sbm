@@ -10,15 +10,12 @@ type Props = {
 };
 
 export default function PasswordChanger({ toggleEditing }: Props) {
-  const [validError, changePasswrd, isPending] = useActionState(
-    (_prev: ValidError | undefined, formData: FormData) => {
-      const err = updatePassword(formData);
+  const [validError, changePasswrd, isPending] = useActionState((_prev: ValidError | undefined, formData: FormData) => {
+    const err = updatePassword(formData);
 
-      if (err) return err;
-      toggleEditing();
-    },
-    undefined
-  );
+    if (err) return err;
+    toggleEditing();
+  }, undefined);
 
   //   const submitHandler = (e: FormEvent<HTMLFormElement>) => {
   //     e.preventDefault();
@@ -33,44 +30,40 @@ export default function PasswordChanger({ toggleEditing }: Props) {
 
   return (
     <form
-      className="rounded-md border-2 border-red-300 p-3"
-      // action={formAction}
-      // onSubmit={(e) => startTransition(() => submitHandler(e))}
-      // onSubmit={submitHandler}
+    // action={formAction}
+    // onSubmit={(e) => startTransition(() => submitHandler(e))}
+    // onSubmit={submitHandler}
     >
-      <LabelInput
-        label="Current Password"
-        type="password"
-        name="curr_passwd"
-        placeholder="Current Password..."
-        error={validError}
-      />
-      <LabelInput
-        label="New Password"
-        type="password"
-        name="passwd"
-        placeholder="New Password..."
-        error={validError}
-      />
-      <LabelInput
-        label="New Password Confirm"
-        type="password"
-        name="passwd2"
-        placeholder="New Current Password..."
-        error={validError}
-      />
-      <div className="mt-4 flex justify-center gap-5">
-        <Button type="reset" variant={"outline"} onClick={toggleEditing}>
-          <Undo2Icon /> 취소
-        </Button>
-        <Button
-          formAction={changePasswrd}
-          type="submit"
-          variant={"primary"}
-          disabled={isPending}
-        >
-          <CheckLineIcon /> 확인
-        </Button>
+      <div className="space-y-4">
+        <LabelInput
+          label="현재 비밀번호"
+          type="password"
+          name="curr_passwd"
+          placeholder="Current Password..."
+          error={validError}
+        />
+        <LabelInput
+          label="새 비밀번호"
+          type="password"
+          name="passwd"
+          placeholder="New Password..."
+          error={validError}
+        />
+        <LabelInput
+          label="새 비밀번호 확인"
+          type="password"
+          name="passwd2"
+          placeholder="New Current Password..."
+          error={validError}
+        />
+        <div className="mt-4 flex justify-center gap-5">
+          <Button type="reset" variant={"outline"} onClick={toggleEditing}>
+            <Undo2Icon /> 취소
+          </Button>
+          <Button formAction={changePasswrd} type="submit" variant={"hero"} disabled={isPending}>
+            <CheckLineIcon /> 확인
+          </Button>
+        </div>
       </div>
     </form>
   );

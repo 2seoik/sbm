@@ -12,8 +12,8 @@ export default function SignOutButton({ name }: { name: string }) {
 
   return (
     <form action={logout}>
-      <Button variant={"success"}>
-        <LogOutIcon />
+      <Button variant="outline" className="gap-2">
+        <LogOutIcon className="h-4 w-4" />
         로그아웃
       </Button>
     </form>

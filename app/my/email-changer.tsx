@@ -33,9 +33,7 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const emailCodeRef = useRef<HTMLInputElement>(null);
 
-  const [submitType, setSubmitType] = useState<"sendmail" | "confirm">(
-    "sendmail"
-  );
+  const [submitType, setSubmitType] = useState<"sendmail" | "confirm">("sendmail");
 
   const [isSending, startTransition] = useTransition();
 
@@ -88,12 +86,7 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
   }, [didSendCode]);
 
   return (
-    <div
-      className={cn(
-        { "mt-5": didSendCode, "mb-7": !didSendCode },
-        "rounded-md border-2 border-green-300 p-2"
-      )}
-    >
+    <div className={cn({ "mt-5": didSendCode, "mb-7": !didSendCode })}>
       <form onSubmit={submitHandler} ref={formRef} className="flex gap-2">
         <LabelInput
           label="email"
@@ -113,11 +106,11 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
                 "items-center": !didSendCode && !!validError,
                 "items-end": !didSendCode && !validError,
               },
-              "flex"
+              "flex",
             )}
           >
-            <Button onClick={sendmail} variant={"success"} disabled={isSending}>
-              {didSendCode ? "Resend" : "Send"} Verify Code
+            <Button onClick={sendmail} variant={"hero"} disabled={isSending}>
+              코드 {didSendCode ? "다시 보내기" : "보내기"}
             </Button>
           </div>
         )}
@@ -133,11 +126,7 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
             ref={emailCodeRef}
             error={validError}
           />
-          <Button
-            onClick={confirmAndSave}
-            variant={"primary"}
-            disabled={isSending}
-          >
+          <Button onClick={confirmAndSave} variant={"hero"} disabled={isSending}>
             Confirm Code & Save
           </Button>
         </div>

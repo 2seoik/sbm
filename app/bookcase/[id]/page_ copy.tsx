@@ -16,7 +16,7 @@ type Props = {
 export default function BookCaseNickname({ params }: Props) {
   const { id } = use(params); // params 이기 떄문에 string
   const session = use(auth());
-  // const userId = Number(session?.user.id);
+  const userId = Number(session?.user.id);
   const isMyBookcase = session?.user.id === id; //!!session?.user;
   // const isMyBookcase = !!session?.user && session.user.id === id;
 
@@ -44,9 +44,9 @@ export default function BookCaseNickname({ params }: Props) {
             <div className="rounded-xl border border-primary/20 bg-primary/10 p-2">
               <SparklesIcon className="h-5 w-5 text-primary" />
             </div>
-            {mbr && <UserAvatar member={mbr} withName={true} side="right" />}
             <div>
-              <h1 className="font-bold font-display text-2xl text-foreground sm:text-3xl">내 컬렉션</h1>
+              {mbr && <UserAvatar member={mbr} withName={true} side="right" />}
+              <h1 className="font-bold font-display text-2xl text-foreground sm:text-3xl">내 컬렉션1</h1>
             </div>
           </div>
           <p className="ml-12 text-muted-foreground">북마크 컬렉션을 관리하고 새로운 인사이트를 발견하세요.</p>
@@ -77,7 +77,8 @@ export default function BookCaseNickname({ params }: Props) {
 
         {/* Toolbar */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          {/* <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
+            {/* Search */}
             <div className="group relative">
               <SearchIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <input
@@ -86,11 +87,13 @@ export default function BookCaseNickname({ params }: Props) {
                 className="w-48 rounded-xl border border-border/50 bg-secondary/50 py-2.5 pr-4 pl-10 text-foreground text-sm transition-all placeholder:text-muted-foreground focus:border-primary/50 focus:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/10 sm:w-64"
               />
             </div>
+
+            {/* Filter */}
             <Button variant="outline" size="sm" className="gap-2 rounded-xl">
               <FilterIcon className="h-4 w-4" />
               <span className="hidden sm:inline">필터</span>
             </Button>
-          </div> */}
+          </div>
 
           <div className="flex items-center gap-3">
             {/* View Mode Toggle */}
@@ -118,38 +121,24 @@ export default function BookCaseNickname({ params }: Props) {
             </div> */}
 
             {/* Create Button */}
-            {isMyBookcase && (
-              <BookDialog>
-                <Button variant="hero" className="gap-2 rounded-xl">
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">새 Book</span>
-                </Button>
-              </BookDialog>
-            )}
+            <Button variant="hero" size="sm" className="gap-2 rounded-xl">
+              <PlusIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">새 Book</span>
+            </Button>
           </div>
         </div>
 
         {/* Kanban Board */}
         <div className="-mx-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent overflow-x-auto px-4 pb-6">
           <div className="flex gap-4 lg:gap-6">
-            {books.length ? (
-              books.map((book, index) => <Book key={book.id} book={book} index={index} />)
-            ) : (
-              <h1 className="flex h-full w-72 flex-shrink-0 flex-col rounded-lg bg-slate-200 p-3 pl-2 text-xl dark:bg-muted">
-                <div className="rounded-lg bg-slate-50 p-3 text-center font-medium text-muted-foreground">
-                  Book이 없습니다.
-                </div>
-              </h1>
-            )}
-
             {/* {mockBooks.map((book, idx) => (
               <BookColumn key={book.id} book={book} index={idx} onAddMark={handleAddMark} />
             ))} */}
 
             {/* Add New Book Column */}
-            {/* <div
+            <div
               className="w-[300px] flex-shrink-0 animate-fade-in opacity-0 sm:w-[340px] lg:w-[360px]"
-              style={{ animationFillMode: "forwards" }}
+              // style={{ animationDelay: `${mockBooks.length * 0.1}s`, animationFillMode: "forwards" }}
             >
               <button className="group flex h-40 w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-border/40 border-dashed text-muted-foreground transition-all hover:border-primary/40 hover:bg-card/50 hover:text-primary">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/50 transition-colors group-hover:bg-primary/10">
@@ -157,7 +146,7 @@ export default function BookCaseNickname({ params }: Props) {
                 </div>
                 <span className="font-medium">새 Book 만들기</span>
               </button>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

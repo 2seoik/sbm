@@ -31,10 +31,10 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden items-center gap-6 md:flex">
             <Link
-              href="#features"
+              href="/bookcase"
               className="link-underline font-medium text-muted-foreground text-sm transition-colors hover:text-foreground"
             >
-              기능
+              대시보드
             </Link>
             <Link
               href="#explore"

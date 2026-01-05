@@ -2,6 +2,7 @@
 
 import {
   BookmarkXIcon,
+  GlobeIcon,
   HatGlassesIcon,
   MessageCircleIcon,
   MoreHorizontalIcon,
@@ -23,11 +24,13 @@ import MarkDialog from "./mark-dialog";
 
 export default function Mark({
   mark,
+  index,
   withdel,
   bookOwner,
   followBooks,
 }: {
   mark: MarkAllColumn;
+  index: number;
   withdel: boolean;
   bookOwner: number;
   followBooks?: number;
@@ -50,10 +53,7 @@ export default function Mark({
   const iLiked = () => likes.map(({ member }) => member).includes(userId);
   const iReported = () => reports.map(({ member }) => member).includes(userId);
 
-  const likeOrReportMark = (
-    e: MouseEvent<HTMLButtonElement>,
-    type: "likes" | "reports"
-  ) => {
+  const likeOrReportMark = (e: MouseEvent<HTMLButtonElement>, type: "likes" | "reports") => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -61,12 +61,9 @@ export default function Mark({
     // const state = type === "likes" ? likes : reports;
     // const setAction = type === "likes" ? setLikes : setReports;
     const col = type === "likes" ? mark.Likes : mark.Report;
-    const dbData = hasNow
-      ? col.filter(({ member }) => member !== userId)
-      : [...col, { member: userId }];
+    const dbData = hasNow ? col.filter(({ member }) => member !== userId) : [...col, { member: userId }];
 
-    const startTransition =
-      type === "likes" ? startTransitionLike : startTransitionReport;
+    const startTransition = type === "likes" ? startTransitionLike : startTransitionReport;
 
     startTransition(async () => {
       try {
@@ -94,10 +91,8 @@ export default function Mark({
     });
   };
 
-  const likeMark = (e: MouseEvent<HTMLButtonElement>) =>
-    likeOrReportMark(e, "likes");
-  const reportMark = (e: MouseEvent<HTMLButtonElement>) =>
-    likeOrReportMark(e, "reports");
+  const likeMark = (e: MouseEvent<HTMLButtonElement>) => likeOrReportMark(e, "likes");
+  const reportMark = (e: MouseEvent<HTMLButtonElement>) => likeOrReportMark(e, "reports");
 
   const openLinkTrigger = async (e: MouseEvent) => {
     e.preventDefault();
@@ -135,62 +130,44 @@ export default function Mark({
   };
 
   return (
-    <div className="group rounded-lg bg-white px-2 pt-2 pb-0.5 shadow-md hover:bg-slate-50 hover:shadow-lg">
-      {/* onclick 의 이벤트가 가능한 태그 Button, a */}
-      <Link
-        href={mark.link}
-        target="_blank"
-        className="mark"
-        rel="noopener noreferrer"
-        onClick={openLinkTrigger}
-      >
-        <div className="flex items-center gap-2">
-          <Avatar className="h-16 w-auto max-w-[50%] rounded-lg group-hover:ring-2 group-hover:ring-primary">
-            <AvatarImage
-              src={mark.image || `https://avatar.vercel.sh/${mark.title}`}
-              className="aspect-auto w-auto"
-            />
-            <AvatarFallback className="w-full">
-              {mark.title.substring(0, 8)}
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="flex flex-col overflow-hidden [&>*]:truncate">
-            <h1 className="text-lg dark:text-black/70" title={mark.title}>
-              {process.env.NODE_ENV === "development" && (
-                <small className="text-muted-foreground">{mark.id}</small>
-              )}
-              {process.env.NODE_ENV === "development" && (
-                <small className="text-red-500"> : {mark.maker}</small>
-              )}
-              {mark.title}
-            </h1>
-            <div className="flex">
-              <div className="w-full min-w-4/5">
-                <div className="truncate text-muted-foreground text-xs">
-                  {mark.descript || mark.title}
-                </div>
-                <div className="truncate text-muted-foreground text-sm underline-offset-2 group-hover:underline">
-                  {mark.link}
-                </div>
-              </div>
-              {bookOwner !== mark.maker && (
-                <div className="w-1/5">
-                  {mark.Member && <UserAvatar member={mark.Member} />}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </Link>
-      <Separator className="mt-2 mb-0.5 bg-muted-foreground/30" />
-      <div
-        className={cn(
-          "flex items-center text-sm",
-          hasAuth ? "justify-between" : "justify-around"
-        )}
-      >
-        {/* 좋아요 */}
+    <div
+      className="group relative rounded-xl border border-border/30 bg-secondary/30 p-3 transition-all duration-300 hover:border-primary/20 hover:bg-secondary/50 hover:shadow-lg hover:shadow-primary/5"
+      style={{ animationDelay: `${index * 0.05}s` }}
+    >
+      <div className="relative mb-3 aspect-[16/9] overflow-hidden rounded-lg bg-background/50">
+        <Avatar className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105">
+          <AvatarImage src={mark.image || `https://avatar.vercel.sh/${mark.title}`} className="aspect-auto w-auto" />
+          <AvatarFallback className="w-full">{mark.title.substring(0, 8)}</AvatarFallback>
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        </Avatar>
+        {/* Hover Actions */}
+        {/* <div className="absolute right-2 bottom-2 flex translate-y-2 gap-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+              <button className="rounded-md bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground">
+                <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+              <button className="rounded-md bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground">
+                <Bookmark className="h-3.5 w-3.5" />
+              </button>
+            </div> */}
+      </div>
+      <div className="space-y-2">
+        <h4 className="line-clamp-2 font-medium text-foreground text-sm leading-snug transition-colors group-hover:text-primary">
+          {mark.title}
+        </h4>
+        <p className="line-clamp-2 text-muted-foreground text-xs leading-relaxed">{mark.descript}</p>
+        <Link
+          href={mark.link}
+          target="_blank"
+          className="inline-flex max-w-full items-center gap-1 truncate text-primary/60 text-xs transition-colors hover:text-primary"
+          rel="noopener noreferrer"
+          onClick={openLinkTrigger}
+        >
+          <GlobeIcon className="h-3 w-3 flex-shrink-0" />
+          <span className="truncate">{new URL(mark.link).hostname}</span>
+        </Link>
+        {bookOwner !== mark.maker && <div className="w-1/5">{mark.Member && <UserAvatar member={mark.Member} />}</div>}
+      </div>
+      <div className="mt-3 flex items-center gap-4 border-border/20 border-t pt-3">
         <IconLabelButton
           icon={<ThumbsUpIcon />}
           // onClick={(e) => likeOrReportMark(e, "likes")}
@@ -201,10 +178,17 @@ export default function Mark({
           {likes.length}
         </IconLabelButton>
 
+        {/* <button className="group/btn flex items-center gap-1.5 text-muted-foreground text-xs transition-colors hover:text-primary">
+            <ThumbsUp className="h-3.5 w-3.5 transition-transform group-hover/btn:scale-110" />
+            <span>{mark.likeCount}</span>
+          </button> */}
         {/* 채팅 */}
-        <IconLabelButton icon={<MessageCircleIcon />}>
-          {mark.Talk.length}
-        </IconLabelButton>
+        <IconLabelButton icon={<MessageCircleIcon />}>{mark.Talk.length}</IconLabelButton>
+
+        {/* <button className="group/btn flex items-center gap-1.5 text-muted-foreground text-xs transition-colors hover:text-primary">
+            <MessageCircle className="h-3.5 w-3.5 transition-transform group-hover/btn:scale-110" />
+            <span>{mark.commentCount}</span>
+          </button> */}
 
         {/* 신고 */}
         <IconLabelButton
@@ -233,6 +217,14 @@ export default function Mark({
             </MarkDialog>
           </>
         )}
+
+        {/* <button className="group/btn flex items-center gap-1.5 text-muted-foreground text-xs transition-colors hover:text-primary">
+            <Share2 className="h-3.5 w-3.5 transition-transform group-hover/btn:scale-110" />
+            <span>{mark.shareCount}</span>
+          </button>
+          <button className="ml-auto rounded-md p-1 opacity-0 transition-colors hover:bg-secondary group-hover:opacity-100">
+            <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+          </button> */}
       </div>
     </div>
   );

@@ -42,9 +42,9 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AlerterProvider>
               <StoreProvider>
-                <div className="min-h-screen bg-background">
+                <div className="flex min-h-screen flex-col bg-background">
                   <Header />
-                  <div>{children}</div>
+                  <main className="flex-1 pt-16">{children}</main>
                   <Footer />
                 </div>
               </StoreProvider>

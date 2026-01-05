@@ -74,9 +74,9 @@ export default function LabelInput({
         />
       </div>
       {err.map((e) => (
-        <span key={e} className="font-medium text-red-500">
+        <p key={e} className="text-destructive text-sm">
           {e}
-        </span>
+        </p>
       ))}
     </div>
   );

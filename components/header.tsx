@@ -52,6 +52,7 @@ export default function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden items-center gap-3 md:flex">
+            <ThemeChanger />
             {didLogin ? (
               // 'session.user?.name
               <Link href="/my" className="relative overflow-hidden rounded-full border">

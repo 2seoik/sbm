@@ -1,21 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/* ========================================
-  1. Theme Configuration (Config 대체)
-  ========================================
-*/
+/* SBM Design System - Dark, Professional, Silicon Valley Aesthetic */
+
 @theme {
   /* Fonts */
-  --font-sans: "Inter", "system-ui", "sans-serif";
-  --font-display: "Sora", "system-ui", "sans-serif";
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Sora", sans-serif;
 
-  /* Colors - Shadcn & System */
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  /* Colors Mapping */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -23,23 +24,21 @@
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
 
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
 
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-  /* Colors - Sidebar */
-  --color-sidebar: var(--sidebar-background);
+  /* Sidebar Colors */
+  --color-sidebar-background: var(--sidebar-background);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
@@ -48,14 +47,15 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Radius (Calculated) */
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  /* Radius */
+  --radius: 0.75rem;
 
-  /* Animations (Native Utilities) 
-     여기 정의하면 .animate-float 등의 클래스가 자동 생성됩니다.
-  */
+  /* Shadows */
+  --shadow-glow: 0 0 60px hsl(173 80% 50% / 0.15);
+  --shadow-card: 0 4px 24px hsl(222 47% 2% / 0.4);
+  --shadow-elevated: 0 8px 32px hsl(222 47% 2% / 0.5);
+
+  /* Animations (Native v4 definition) */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-fade-in: fade-in 0.6s ease-out forwards;
@@ -68,26 +68,32 @@
   --animate-pulse-slow: pulse-slow 4s ease-in-out infinite;
   --animate-gradient: gradient-shift 8s ease infinite;
 
-  /* Shadows */
-  --shadow-glow: 0 0 60px hsl(173 80% 50% / 0.15);
-  --shadow-card: 0 4px 24px hsl(222 47% 2% / 0.4);
-  --shadow-elevated: 0 8px 32px hsl(222 47% 2% / 0.5);
-
-  /* Keyframes */
-  @keyframes accordion-down {
-    from {
-      height: 0;
+  /* Keyframes inside theme */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
     }
-    to {
-      height: var(--radix-accordion-content-height);
+    50% {
+      transform: translateY(-10px);
     }
   }
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 0.4;
     }
-    to {
-      height: 0;
+    50% {
+      opacity: 0.8;
+    }
+  }
+  @keyframes gradient-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
     }
   }
   @keyframes fade-in {
@@ -130,64 +136,66 @@
       transform: translateX(0);
     }
   }
-  @keyframes glow-pulse {
-    0%,
-    100% {
-      opacity: 0.4;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.8;
-      transform: scale(1.05);
-    }
-  }
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-  @keyframes pulse-slow {
-    0%,
-    100% {
-      opacity: 0.4;
-    }
-    50% {
-      opacity: 0.8;
-    }
-  }
-  @keyframes gradient-shift {
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
 }
 
-/* ========================================
-  2. Custom Utilities
-  ========================================
-*/
-@utility container {
-  margin-inline: auto;
-  padding-inline: 2rem;
-  @media (width >= 1400px) {
-    max-width: 1400px;
-  }
-}
-
-/* ========================================
-  3. Base Styles (CSS Variables)
-  ========================================
-*/
+/* CSS Variables Definition */
 @layer base {
   :root {
+    /* Light Mode - HSL wrapping added for v4 compatibility */
+    --background: hsl(210 40% 98%);
+    --foreground: hsl(222 47% 11%);
+
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(222 47% 11%);
+
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222 47% 11%);
+
+    --primary: hsl(173 80% 40%);
+    --primary-foreground: hsl(0 0% 100%);
+
+    --secondary: hsl(220 14% 96%);
+    --secondary-foreground: hsl(222 47% 11%);
+
+    --muted: hsl(220 14% 96%);
+    --muted-foreground: hsl(220 9% 46%);
+
+    --accent: hsl(265 80% 60%);
+    --accent-foreground: hsl(0 0% 100%);
+
+    --destructive: hsl(0 72% 51%);
+    --destructive-foreground: hsl(0 0% 100%);
+
+    --border: hsl(220 13% 91%);
+    --input: hsl(220 13% 91%);
+    --ring: hsl(173 80% 40%);
+
+    --radius: 0.75rem;
+
+    /* Custom tokens - Light */
+    --gradient-primary: linear-gradient(135deg, hsl(173 80% 40%) 0%, hsl(200 80% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(265 80% 60%) 0%, hsl(300 70% 55%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(210 40% 98%) 0%, hsl(220 14% 96%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(220 14% 98% / 0.8) 100%);
+    --gradient-glow: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      hsl(173 80% 40% / 0.08),
+      transparent 40%
+    );
+
+    /* Sidebar - Light */
+    --sidebar-background: hsl(0 0% 100%);
+    --sidebar-foreground: hsl(222 47% 11%);
+    --sidebar-primary: hsl(173 80% 40%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(220 14% 96%);
+    --sidebar-accent-foreground: hsl(222 47% 11%);
+    --sidebar-border: hsl(220 13% 91%);
+    --sidebar-ring: hsl(173 80% 40%);
+  }
+
+  /* Dark Mode */
+  .dark {
     --background: hsl(222 47% 5%);
     --foreground: hsl(210 40% 98%);
 
@@ -216,9 +224,7 @@
     --input: hsl(222 30% 14%);
     --ring: hsl(173 80% 50%);
 
-    --radius: 0.75rem;
-
-    /* Custom Gradients */
+    /* Custom tokens - Dark */
     --gradient-primary: linear-gradient(135deg, hsl(173 80% 50%) 0%, hsl(200 80% 55%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(265 80% 65%) 0%, hsl(300 70% 60%) 100%);
     --gradient-hero: linear-gradient(180deg, hsl(222 47% 5%) 0%, hsl(222 50% 8%) 100%);
@@ -229,7 +235,11 @@
       transparent 40%
     );
 
-    /* Sidebar */
+    --shadow-glow: 0 0 60px hsl(173 80% 50% / 0.15);
+    --shadow-card: 0 4px 24px hsl(222 47% 2% / 0.4);
+    --shadow-elevated: 0 8px 32px hsl(222 47% 2% / 0.5);
+
+    /* Sidebar - Dark */
     --sidebar-background: hsl(222 47% 6%);
     --sidebar-foreground: hsl(210 40% 90%);
     --sidebar-primary: hsl(173 80% 50%);
@@ -240,16 +250,19 @@
     --sidebar-ring: hsl(173 80% 50%);
   }
 
-  /* Shadcn Dark Mode Support */
-  .dark {
-    --background: hsl(222 47% 5%);
-    --foreground: hsl(210 40% 98%);
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
 
+  /* Headings map to the custom display font */
   h1,
   h2,
   h3,
@@ -260,10 +273,6 @@
   }
 }
 
-/* ========================================
-  4. Component Classes (Custom)
-  ========================================
-*/
 @layer components {
   /* 1. 기본 glass 클래스 */
   .glass {
@@ -271,13 +280,14 @@
   }
 
   /* 2. glass-hover 클래스 
-     (@apply glass 대신 glass의 스타일을 직접 포함시켰습니다) 
+     문제 원인: @apply glass; 
+     해결: glass의 내용을 직접 다시 적어줍니다.
   */
   .glass-hover {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50 transition-all duration-300 hover:bg-card/80 hover:border-primary/30;
+    @apply bg-card/60 backdrop-blur-xl border border-border/50; /* glass 스타일 복사 */
+    @apply transition-all duration-300 hover:bg-card/80 hover:border-primary/30;
   }
 
-  /* ... 기존 코드들 ... */
   .gradient-text {
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-primary);
@@ -293,10 +303,13 @@
   }
 
   /* 3. card-elevated 클래스
-     (마찬가지로 glass-hover 내용을 직접 포함시켰습니다)
+     문제 원인: @apply glass-hover;
+     해결: 필요한 스타일을 직접 나열합니다.
   */
   .card-elevated {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50 transition-all duration-300 hover:bg-card/80 hover:border-primary/30 rounded-xl;
+    @apply bg-card/60 backdrop-blur-xl border border-border/50; /* glass 스타일 */
+    @apply transition-all duration-300 hover:bg-card/80 hover:border-primary/30; /* hover 스타일 */
+    @apply rounded-xl;
     box-shadow: var(--shadow-card);
   }
 
@@ -314,12 +327,7 @@
   }
 }
 
-/* ========================================
-  5. Utilities
-  ========================================
-*/
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* @layer utilities 대신 @utility 사용 */
+@utility text-balance {
+  text-wrap: balance;
 }

@@ -7,8 +7,7 @@ import { useActionState, useEffect, useReducer, useRef, useState } from "react";
 import LabelInput from "@/components/label-input";
 import { LoadingIcon } from "@/components/loading-icon";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { SocialLoginButton } from "./(sign-buttons)/social-login-button";
 import { authorize, regist } from "./sign.action";
 
 export default function SignForm() {
@@ -26,11 +25,38 @@ export default function SignForm() {
       </div>
       {isSignin ? (
         // 로그인
-        <SignIn toggleSign={toggleSign} />
+        <SignIn />
       ) : (
         // 회원가입
-        <SignUp toggleSign={toggleSign} />
+        <SignUp />
       )}
+      <div className="relative my-8">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-border/50 border-t" />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-background px-4 text-muted-foreground">또는</span>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <SocialLoginButton provider="google" />
+        <SocialLoginButton provider="github" />
+        <div className="grid grid-cols-2 gap-3">
+          <SocialLoginButton provider="naver" />
+          <SocialLoginButton provider="kakao" />
+        </div>
+      </div>
+      <p className="mt-8 text-center text-muted-foreground">
+        {isSignin ? "계정이 없으신가요?" : "이미 계정이 있으신가요?"}
+        <Link
+          href="#"
+          onClick={toggleSign}
+          className="font-medium text-primary transition-colors hover:text-primary/80"
+        >
+          {" "}
+          {isSignin ? "회원가입" : "로그인"}
+        </Link>
+      </p>
     </>
   );
 }
@@ -43,7 +69,7 @@ const storeEmail = (email: string | null) => {
 };
 
 // 로그인
-function SignIn({ toggleSign }: { toggleSign: () => void }) {
+function SignIn() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const redirectTo = searchParams.get("redirectTo");
@@ -75,48 +101,46 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
   }, [email]);
 
   return (
-    <>
+    <form action={makeLoginAction} className="space-y-6">
       {/* hidden 필드 넣고, makeLogin 함수 직접 호출하여도 무방, 하지만 hidden 값이 쉽게 노출될 우려가 있음. */}
-      <form action={makeLoginAction} className="space-y-6">
-        {/* {redirectTo && (
+      {/* {redirectTo && (
           <input type="hidden" name="redirectTo" value={redirectTo} />
         )} */}
-        {/* Email Field */}
-        <LabelInput
-          label="이메일"
-          name="email"
-          type="email"
-          error={validError}
-          ref={emailRef}
-          focus={true}
-          defaultValue={email || ""}
-          // defaultValue={"jeonseongho@naver.com"}
-          placeholder="email@example.com"
-          icon={MailIcon}
-        />
 
-        {/* Password Field */}
-        <div className="relative">
-          <div className="absolute top-0 right-0">
-            <Link href="/forgotpasswd" className="text-primary text-sm transition-colors hover:text-primary/80">
-              비밀번호 찾기
-            </Link>
-          </div>
-          <LabelInput
-            label="비밀번호"
-            name="passwd"
-            type="password"
-            error={validError}
-            ref={passwdRef}
-            // defaultValue={"11111111"}
-            placeholder="Your Password"
-            icon={LockIcon}
-          />
+      <LabelInput
+        label="이메일"
+        name="email"
+        type="email"
+        error={validError}
+        ref={emailRef}
+        focus={true}
+        defaultValue={email || ""}
+        // defaultValue={""}
+        placeholder="email@example.com"
+        icon={MailIcon}
+      />
+
+      <div className="relative">
+        <div className="absolute top-0 right-0">
+          <Link href="/forgotpasswd" className="text-primary text-sm transition-colors hover:text-primary/80">
+            비밀번호 찾기
+          </Link>
         </div>
-        <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isPending}>
-          <LoadingIcon isPending={isPending}>로그인</LoadingIcon>
-        </Button>
-        {/* <div className="flex justify-between">
+        <LabelInput
+          label="비밀번호"
+          name="passwd"
+          type="password"
+          error={validError}
+          ref={passwdRef}
+          // defaultValue={"11111111"}
+          placeholder="Your Password"
+          icon={LockIcon}
+        />
+      </div>
+      <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isPending}>
+        <LoadingIcon isPending={isPending}>로그인</LoadingIcon>
+      </Button>
+      {/* <div className="flex justify-between">
           <label htmlFor="remember" className="cursor-pointer">
             <input
               type="checkbox"
@@ -129,8 +153,7 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
           </label>
           <Link href="/forgotpasswd">Forgot Password?</Link>
         </div> */}
-      </form>
-    </>
+    </form>
   );
 }
 
@@ -146,76 +169,62 @@ const dummy = {
 };
 
 // 회원가입
-function SignUp({ toggleSign }: { toggleSign: () => void }) {
+function SignUp() {
   const [validError, makeRegist, isPending] = useActionState(regist, undefined);
   const [showPasswd, setShowPasswd] = useState(false);
 
   return (
-    <>
-      <form action={makeRegist} className="flex flex-col space-y-3">
-        {/* Email Field */}
+    <form action={makeRegist} className="flex flex-col space-y-3">
+      <LabelInput
+        label="이메일"
+        type="email"
+        name="email"
+        focus={true}
+        error={validError}
+        defaultValue={dummy.email}
+        placeholder="email@bookmark.com"
+        icon={MailIcon}
+      />
+      <LabelInput
+        label="닉네임"
+        type="text"
+        name="nickname"
+        error={validError}
+        defaultValue={dummy.nickname}
+        placeholder="Your NickName..."
+        icon={UserIcon}
+      />
+      <LabelInput
+        label="비밀번호"
+        type="password"
+        name="passwd"
+        error={validError}
+        defaultValue={dummy.passwd}
+        placeholder="Your Password..."
+        icon={LockIcon}
+      />
+      <div className="relative">
         <LabelInput
-          label="이메일"
-          type="email"
-          name="email"
+          label="비밀번호 확인"
+          type={showPasswd ? "text" : "password"}
+          name="passwd2"
           error={validError}
-          defaultValue={dummy.email}
-          placeholder="email@bookmark.com"
-          icon={MailIcon}
-        />
-
-        {/* Nick Name Field */}
-        <LabelInput
-          label="닉네임"
-          type="text"
-          name="nickname"
-          error={validError}
-          defaultValue={dummy.nickname}
-          placeholder="Your NickName..."
-          icon={UserIcon}
-        />
-
-        {/* Password Field */}
-        <LabelInput
-          label="비밀번호"
-          type="password"
-          name="passwd"
-          error={validError}
-          defaultValue={dummy.passwd}
+          defaultValue={dummy.passwd2}
           placeholder="Your Password..."
           icon={LockIcon}
         />
-
-        {/* Confirm Password Field */}
-        <div className="relative">
-          <LabelInput
-            label="비밀번호 확인"
-            type={showPasswd ? "text" : "password"}
-            name="passwd2"
-            error={validError}
-            defaultValue={dummy.passwd2}
-            placeholder="Your Password..."
-            icon={LockIcon}
-          />
-          {/* <button
+        {/* <button
             type="button"
             onClick={() => setShowPasswd(!showPasswd)}
             className="-translate-y-1/2 absolute top-12 right-3 text-muted-foreground transition-colors hover:text-foreground"
           >
             {showPasswd ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
           </button> */}
-        </div>
+      </div>
 
-        <Button type="submit" variant="hero" className="w-full" disabled={isPending}>
-          <LoadingIcon isPending={isPending}>회원가입</LoadingIcon>
-        </Button>
-      </form>
-      {/* <div className="mt-5 flex gap-10">
-        <span>Already have account</span>
-        <Link href="#" onClick={toggleSign}>
-          Sign In
-        </Link>
-      </div> */}
-    </>
+      <Button type="submit" variant="hero" className="w-full" disabled={isPending}>
+        <LoadingIcon isPending={isPending}>회원가입</LoadingIcon>
+      </Button>
+    </form>
   );
 }

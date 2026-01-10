@@ -1,11 +1,10 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useLogin } from "./login-hook";
+import { login } from "../sign.action";
 
 type Props = {
   provider: "google" | "github" | "naver" | "kakao";
+  redirectTo: string | null;
   className?: string;
 };
 
@@ -75,14 +74,18 @@ const providerConfig = {
   },
 };
 
-export function SocialLoginButton({ provider, className }: Props) {
+export function SocialLoginButton({ provider, redirectTo, className }: Props) {
   const config = providerConfig[provider];
-  const makeLogin = useLogin();
+
+  const makeLogin = async () => {
+    "use server";
+    await login(provider, redirectTo);
+  };
 
   return (
     <Button
       type="button"
-      onClick={() => makeLogin(provider)}
+      onClick={makeLogin}
       className={cn("h-12 w-full gap-3 font-medium transition-all duration-200", config.bgClass, className)}
     >
       {config.icon}

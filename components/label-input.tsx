@@ -50,7 +50,7 @@ export default function LabelInput({
   }, [err]);
 
   return (
-    <div className={cn("space-y-1", className)}>
+    <div className={cn("space-y-2", className)}>
       <label htmlFor={uniqueName} className="font-semibold text-sm capitalize">
         {label}
       </label>

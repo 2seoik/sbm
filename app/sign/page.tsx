@@ -77,22 +77,6 @@ export default function Sign({ searchParams }: Props) {
             </Link>
           </div>
           <SignForm />
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-border/50 border-t" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-background px-4 text-muted-foreground">또는</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <SocialLoginButton provider="google" redirectTo={redirectTo} />
-            <SocialLoginButton provider="github" redirectTo={redirectTo} />
-            <div className="grid grid-cols-2 gap-3">
-              <SocialLoginButton provider="naver" redirectTo={redirectTo} />
-              <SocialLoginButton provider="kakao" redirectTo={redirectTo} />
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -4,13 +4,12 @@ import { AvatarFallback } from "@radix-ui/react-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { MemberWithCount } from "@/lib/db";
-import { DummyProfiieFile } from "@/lib/utils";
+import { cn, DummyProfiieFile } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
-export type PartialExclude<T, R extends keyof T> = Partial<T> &
-  Required<Pick<T, R>>;
+export type PartialExclude<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
 
 // type X = PartialExclude<NonNullable<MemberWithCount>, 'id'>;
 // const x: X = { id: 1, image: 'xx', nickname: 'xx', isadmin: false };
@@ -20,9 +19,10 @@ type Props = {
   member: PartialExclude<NonNullable<MemberWithCount>, "id" | "nickname">;
   withName?: boolean;
   side?: "bottom" | "top" | "right" | "left";
+  size?: "sm" | "lg";
 };
 
-export default function UserAvatar({ member, withName, side }: Props) {
+export default function UserAvatar({ member, withName, side, size = "sm" }: Props) {
   const isMobile = useIsMobile();
 
   if (!member)
@@ -41,18 +41,10 @@ export default function UserAvatar({ member, withName, side }: Props) {
     <div className="flex items-center gap-1">
       <Card>
         <Trigger asChild>
-          <Button
-            variant="link"
-            className="h-full touch-none p-0 md:pointer-events-auto md:touch-auto"
-          >
-            <Avatar className="border">
-              <AvatarImage
-                src={member.image || DummyProfiieFile}
-                className="object-cover"
-              />
-              <AvatarFallback className="text-xl">
-                {member.nickname.substring(0, 2)}
-              </AvatarFallback>
+          <Button variant="link" className="h-full touch-none p-0 md:pointer-events-auto md:touch-auto">
+            <Avatar className={cn(size === "lg" && "h-14 w-14", "border")}>
+              <AvatarImage src={member.image || DummyProfiieFile} className="object-cover" />
+              <AvatarFallback className="text-xl">{member.nickname.substring(0, 2)}</AvatarFallback>
             </Avatar>
           </Button>
         </Trigger>

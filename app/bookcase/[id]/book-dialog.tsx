@@ -1,8 +1,9 @@
 "use client";
 
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { BookMarkedIcon, BookOpenIcon, FlameIcon, GlobeIcon, LockIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type PropsWithChildren, useActionState, useState } from "react";
+import { type PropsWithChildren, RefObject, useActionState, useEffect, useRef, useState } from "react";
 import CheckSwitch from "@/components/check-switch";
 import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ import { useAlerter } from "@/hooks/contexts/alerter";
 import type { BookData } from "@/lib/db";
 import type { ValidError } from "@/lib/validator";
 import { deleteBook, saveBook } from "./book.action";
+
+type OptionKey = "isPublic" | "burnAfterReading";
 
 export default function BookDialog({
   book = {
@@ -41,26 +44,27 @@ export default function BookDialog({
   // const [ispublic, setPublic] = useState(false);
   // const [withdel, setWithdel] = useState(false);
   const [isOpen, setOpen] = useState(false);
+  const [options, setOptions] = useState<Record<OptionKey, boolean>>({
+    isPublic: false,
+    burnAfterReading: false,
+  });
 
-  const [validError, save, isPending] = useActionState(
-    async (_prev: ValidError | undefined, formData: FormData) => {
-      // formData.set("ispublic", ispublic ? "on" : "");
-      // formData.set("withdel", withdel ? "on" : "");
+  const [validError, save, isPending] = useActionState(async (_prev: ValidError | undefined, formData: FormData) => {
+    // formData.set("ispublic", ispublic ? "on" : "");
+    // formData.set("withdel", withdel ? "on" : "");
 
-      // id 가 있는경우 수정처리
-      formData.set("id", String(book.id));
-      // console.log(">>>>>>", Object.fromEntries(formData.entries()));
-      const err = await saveBook(formData);
-      if (err) {
-        return err;
-      }
+    // id 가 있는경우 수정처리
+    formData.set("id", String(book.id));
+    // console.log(">>>>>>", Object.fromEntries(formData.entries()));
+    const err = await saveBook(formData);
+    if (err) {
+      return err;
+    }
 
-      setOpen(false);
-      //
-      // router.refresh();
-    },
-    undefined
-  );
+    setOpen(false);
+    //
+    // router.refresh();
+  }, undefined);
 
   const remove = async () => {
     const ret = await confirm({
@@ -111,25 +115,36 @@ export default function BookDialog({
   //   }
   // }, [validError]);
 
+  const handleOptionChange = (key: OptionKey, value: boolean) => {
+    setOptions((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
-        <form action={save}>
-          <DialogHeader>
-            <DialogTitle>Book {!book.id ? "생성" : "수정"}</DialogTitle>
-            <DialogDescription>descript...</DialogDescription>
-          </DialogHeader>
-
-          <div className="mt-5 space-y-5">
+        <DialogHeader>
+          <div className="mb-2 flex items-center gap-3">
+            <div className="rounded-xl border border-primary/20 bg-primary/10 p-2">
+              <BookMarkedIcon className="h-5 w-5 text-primary" />
+            </div>
+            <DialogTitle className="font-display text-xl">Book {!book.id ? "만들기" : "수정하기"}</DialogTitle>
+          </div>
+          <DialogDescription>설명...</DialogDescription>
+        </DialogHeader>
+        <form action={save} className="mt-4 space-y-5">
+          <div className="space-y-2">
             <LabelInput
-              label="title"
+              label="제목"
               name="title"
               error={validError}
               defaultValue={book.title}
+              placeholder="예: React 심화 학습"
               defaultChecked
             />
-
             {/* <div className="flex items-center gap-3">
               <Checkbox
                 id="ispublic"
@@ -141,21 +156,65 @@ export default function BookDialog({
                 Public {ispublic && "XX"}
               </Label>
             </div> */}
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/50 p-4">
+            <div className="flex items-center gap-3">
+              {options.isPublic ? (
+                <GlobeIcon className="h-5 w-5 text-primary" />
+              ) : (
+                <LockIcon className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div>
+                <p className="font-medium text-sm">{options.isPublic ? "공개" : "비공개"}</p>
+                <p className="text-muted-foreground text-xs">
+                  {options.isPublic ? "모든 사람이 이 Book을 볼 수 있습니다." : "나만 이 Book을 볼 수 있습니다."}
+                </p>
+              </div>
+            </div>
             <CheckSwitch
+              type="switch"
               name="ispublic"
               label="공개 설정"
               error={validError}
               checkValue={book.ispublic}
+              setCheckedFunction={(checked) => handleOptionChange("isPublic", checked)}
             />
-
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/50 p-4">
+            <div className="flex items-center gap-3">
+              {options.burnAfterReading ? (
+                <FlameIcon className="h-5 w-5 text-orange-500" />
+              ) : (
+                <BookOpenIcon className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div>
+                <p className="font-medium text-sm">{options.burnAfterReading ? "1회성 열람" : "영구 보관"}</p>
+                <p className="text-muted-foreground text-xs">
+                  {options.burnAfterReading
+                    ? "열람 후 자동으로 Mark가 삭제됩니다."
+                    : "Mark가 삭제되지 않고 Book에 계속 보관됩니다."}
+                </p>
+              </div>
+            </div>
             <CheckSwitch
               name="withdel"
-              label="열람 및 삭제"
+              label="보관 설정"
               type="switch"
               error={validError}
               checkValue={book.withdel}
+              setCheckedFunction={(checked) => handleOptionChange("burnAfterReading", checked)}
             />
-
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="remark">설명</Label>
+            <Textarea
+              placeholder="Book 설명..."
+              id="remark"
+              name="remark"
+              defaultValue={book.remark ?? ""}
+              className="resize-none"
+              rows={3}
+            />
             {/* <div>
               <div className="flex items-center gap-3">
                 <Switch
@@ -172,21 +231,6 @@ export default function BookDialog({
                 {validError?.withdel?.errors[0]}
               </p>
             </div> */}
-
-            <div className="flex flex-col">
-              <Label
-                htmlFor="remark"
-                className="font-semibold text-sm capitalize"
-              >
-                Description
-              </Label>
-              <Textarea
-                placeholder="Book 설명..."
-                id="remark"
-                name="remark"
-                defaultValue={book.remark ?? ""}
-              />
-            </div>
           </div>
 
           <DialogFooter className="mt-5">

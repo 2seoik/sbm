@@ -6,14 +6,18 @@ import {
   HatGlassesIcon,
   MessageCircleIcon,
   MoreHorizontalIcon,
+  ThumbsUp,
   ThumbsUpIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { type MouseEvent, useOptimistic, useTransition } from "react";
 import IconLabelButton from "@/components/icon-label-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import Img from "@/components/ui/img";
 import { Separator } from "@/components/ui/separator";
 import UserAvatar from "@/components/user-avatar";
 import { useAlerter } from "@/hooks/contexts/alerter";
@@ -131,25 +135,18 @@ export default function Mark({
 
   return (
     <div
-      className="group relative rounded-xl border border-border/30 bg-secondary/30 p-3 transition-all duration-300 hover:border-primary/20 hover:bg-secondary/50 hover:shadow-lg hover:shadow-primary/5"
+      className="group relative cursor-pointer rounded-xl border border-border/30 bg-secondary/30 p-3 transition-all duration-300 hover:border-primary/20 hover:bg-secondary/50 hover:shadow-lg hover:shadow-primary/5"
       style={{ animationDelay: `${index * 0.05}s` }}
     >
       <div className="relative mb-3 aspect-[16/9] overflow-hidden rounded-lg bg-background/50">
-        <Avatar className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105">
-          <AvatarImage src={mark.image || `https://avatar.vercel.sh/${mark.title}`} className="aspect-auto w-auto" />
-          <AvatarFallback className="w-full">{mark.title.substring(0, 8)}</AvatarFallback>
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        </Avatar>
-        {/* Hover Actions */}
-        {/* <div className="absolute right-2 bottom-2 flex translate-y-2 gap-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-              <button className="rounded-md bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground">
-                <ExternalLink className="h-3.5 w-3.5" />
-              </button>
-              <button className="rounded-md bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-primary hover:text-primary-foreground">
-                <Bookmark className="h-3.5 w-3.5" />
-              </button>
-            </div> */}
+        <Img
+          src={mark.image || `https://avatar.vercel.sh/${mark.title}`}
+          alt={mark.title.substring(0, 8)}
+          className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </div>
+
       <div className="space-y-2">
         <h4 className="line-clamp-2 font-medium text-foreground text-sm leading-snug transition-colors group-hover:text-primary">
           {mark.title}
@@ -167,23 +164,24 @@ export default function Mark({
         </Link>
         {bookOwner !== mark.maker && <div className="w-1/5">{mark.Member && <UserAvatar member={mark.Member} />}</div>}
       </div>
-      <div className="mt-3 flex items-center gap-4 border-border/20 border-t pt-3">
+
+      {/* Stats */}
+      <div className="mt-3 flex items-center gap-1 border-border/20 border-t pt-3">
+        {/* 좋아요 */}
         <IconLabelButton
           icon={<ThumbsUpIcon />}
-          // onClick={(e) => likeOrReportMark(e, "likes")}
           onClick={likeMark}
           isActive={iLiked()}
           disabled={isLikePending}
+          variant="actionLike"
         >
-          {likes.length}
+          <span>{likes.length}</span>
         </IconLabelButton>
 
-        {/* <button className="group/btn flex items-center gap-1.5 text-muted-foreground text-xs transition-colors hover:text-primary">
-            <ThumbsUp className="h-3.5 w-3.5 transition-transform group-hover/btn:scale-110" />
-            <span>{mark.likeCount}</span>
-          </button> */}
         {/* 채팅 */}
-        <IconLabelButton icon={<MessageCircleIcon />}>{mark.Talk.length}</IconLabelButton>
+        <IconLabelButton icon={<MessageCircleIcon />} variant="actionComment">
+          {mark.Talk.length}
+        </IconLabelButton>
 
         {/* <button className="group/btn flex items-center gap-1.5 text-muted-foreground text-xs transition-colors hover:text-primary">
             <MessageCircle className="h-3.5 w-3.5 transition-transform group-hover/btn:scale-110" />
@@ -193,11 +191,10 @@ export default function Mark({
         {/* 신고 */}
         <IconLabelButton
           icon={<HatGlassesIcon />}
-          // onClick={(e) => likeOrReportMark(e, "reports")}
           onClick={reportMark}
           isActive={iReported()}
           disabled={isReportPending}
-          isDanger
+          variant="actionReport"
         >
           {reports.length}
         </IconLabelButton>
@@ -210,11 +207,15 @@ export default function Mark({
               icon={<BookmarkXIcon className="size-5" />}
               tooltip="바로 삭제"
               disabled={isRemovePending}
+              variant="action"
               isDanger
             />
-            <MarkDialog mark={mark}>
-              <IconLabelButton icon={<MoreHorizontalIcon />} />
-            </MarkDialog>
+            {/* 수정 */}
+            <div className="ml-auto h-7 w-7 opacity-0 hover:text-primary group-hover:opacity-100">
+              <MarkDialog mark={mark}>
+                <IconLabelButton icon={<MoreHorizontalIcon />} variant="action" />
+              </MarkDialog>
+            </div>
           </>
         )}
 

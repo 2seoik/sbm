@@ -1,6 +1,7 @@
 import {
   AlbumIcon,
   BookKeyIcon,
+  Bookmark,
   BookmarkIcon,
   CopyXIcon,
   GlobeIcon,
@@ -8,6 +9,7 @@ import {
   LockIcon,
   MoreHorizontalIcon,
   PlusIcon,
+  ThumbsUp,
   ThumbsUpIcon,
 } from "lucide-react";
 import { use } from "react";
@@ -51,7 +53,7 @@ export default function Book({ id, index, book }: Props) {
       style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards" }}
     >
       {/* Book Header with Gradient Accent */}
-      <div className={`relative overflow-hidden rounded-t-2xl bg-gradient-to-br p-[1px]`}>
+      <div className={`relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-primary/20 to-primary/5 p-[1px]`}>
         <div className="rounded-t-2xl bg-card p-4">
           <div className="mb-1 flex items-center justify-between">
             <div className="flex min-w-0 items-center gap-2">
@@ -68,8 +70,11 @@ export default function Book({ id, index, book }: Props) {
             </div>
             {isMine ? (
               <BookDialog book={book}>
-                <Button variant={"ghost"} className="font-semibold text-lg hover:bg-slate-300">
-                  <MoreHorizontalIcon />
+                <Button
+                  variant={"ghost"}
+                  className="flex-shrink-0 rounded-lg p-1.5 opacity-60 transition-colors hover:bg-secondary hover:opacity-100"
+                >
+                  <MoreHorizontalIcon className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </BookDialog>
             ) : (
@@ -80,7 +85,7 @@ export default function Book({ id, index, book }: Props) {
                   bookOwner={member}
                   isActive={followBooks.map(({ member }) => member).includes(loginUserId)}
                 >
-                  {followBooks.length}
+                  {/* {followBooks.length} */}
                 </FollowButton>
               )
             )}
@@ -89,10 +94,10 @@ export default function Book({ id, index, book }: Props) {
           {/* Mini stats */}
           <div className="mt-2 flex items-center gap-3 text-muted-foreground text-xs">
             <span className="flex items-center gap-1">
-              <IconLabel icon={<AlbumIcon />}>{marks.length}</IconLabel>
+              <IconLabel icon={<AlbumIcon className="h-3 w-3" />}>{marks.length} marks</IconLabel>
             </span>
             <span className="flex items-center gap-1">
-              <IconLabel noti={"success"} icon={<ThumbsUpIcon className="" />}>
+              <IconLabel icon={<ThumbsUpIcon className="h-3 w-3" />}>
                 {marks.reduce((acc, mark) => acc + mark.Likes.length, 0)}
               </IconLabel>
             </span>

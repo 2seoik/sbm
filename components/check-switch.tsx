@@ -31,8 +31,7 @@ export default function CheckSwitch({
 }: Props) {
   const uid = useId();
 
-  const { errors, value } =
-    !!error && !!name && error[name] ? error[name] : { errors: [] };
+  const { errors, value } = !!error && !!name && error[name] ? error[name] : { errors: [] };
   const [checked, setChecked] = useState(checkValue || !!value);
 
   const Compo = type === "checkbox" ? Checkbox : Switch;
@@ -58,16 +57,15 @@ export default function CheckSwitch({
         <Label htmlFor={uid} className="cursor-pointer">
           {label}
         </Label>
-        {type === "checkbox" && !!name && (
-          <Input type="hidden" name={name} value={checked ? "on" : ""} />
-        )}
+        {type === "checkbox" && !!name && <Input type="hidden" name={name} value={checked ? "on" : ""} />}
       </div>
-
-      {errors?.map((e) => (
-        <p key={e} className="mt-1 text-red-500 text-sm">
-          {e}
-        </p>
-      ))}
+      <div className="flex flex-col">
+        {errors?.map((e) => (
+          <p key={e} className="mt-1 text-red-500 text-sm">
+            {e}
+          </p>
+        ))}
+      </div>
     </div>
   );
 }

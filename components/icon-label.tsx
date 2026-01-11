@@ -10,21 +10,14 @@ type Props = {
   isDanger?: boolean;
 };
 
-export default function IconLabel({
-  icon,
-  size,
-  isActive,
-  isDanger,
-  noti,
-  children,
-}: PropsWithChildren<Props>) {
+export default function IconLabel({ icon, size, isActive, isDanger, noti, children }: PropsWithChildren<Props>) {
   const lucideIcon = cloneElement(icon, {
     className: cn(
-      "text-muted-foreground",
+      "w-3.5 h-3.5",
       isDanger && "text-destructive",
       isActive && "fill-primary",
       { "mr-1": !!noti, "mr-[.3rem]": !!children || children === 0 },
-      icon.props?.className
+      icon.props?.className,
     ),
     size: size ?? (noti ? 25 : 20),
   });
@@ -33,7 +26,7 @@ export default function IconLabel({
   const transX = cLen > 1 ? cLen * 0.5 : cLen;
 
   return (
-    <div className="relative flex items-center gap-1 text-muted-foreground">
+    <div className="relative flex items-center">
       {lucideIcon}
       {noti ? (
         <small
@@ -45,13 +38,13 @@ export default function IconLabel({
               "bg-muted-foreground": noti === "secondary",
               "bg-destructive": noti === "destructive",
               "bg-green-500": noti === "success",
-            }
+            },
           )}
         >
           {children}
         </small>
       ) : (
-        children
+        <span className="font-medium text-xs">{children}</span>
       )}
     </div>
   );

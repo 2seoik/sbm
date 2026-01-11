@@ -1,4 +1,14 @@
-import { AlbumIcon, BookMarkedIcon, FilterIcon, HeartPlusIcon, PlusIcon, SearchIcon, SparklesIcon } from "lucide-react";
+import {
+  AlbumIcon,
+  BookIcon,
+  BookMarkedIcon,
+  BookmarkIcon,
+  FilterIcon,
+  HeartPlusIcon,
+  PlusIcon,
+  SearchIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { use } from "react";
 import IconLabel from "@/components/icon-label";
 import { Button } from "@/components/ui/button";
@@ -21,7 +31,14 @@ export default function BookCaseNickname({ params }: Props) {
   // const isMyBookcase = !!session?.user && session.user.id === id;
 
   const mbr = use(findMemberByIdWithCount(id));
-  if (!mbr) return <h1 className="text-2xl">사용자가 없습니다.</h1>;
+
+  if (!mbr)
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="mb-4 font-bold text-2xl text-foreground">BookCase를 찾을 수 없습니다</h1>
+        <p className="mb-6 text-muted-foreground">요청하신 BookCase가 존재하지 않거나 삭제되었습니다.</p>
+      </div>
+    );
 
   const books = use(getAllBooksByMember(Number(id)));
 
@@ -40,13 +57,12 @@ export default function BookCaseNickname({ params }: Props) {
       <div className="container relative mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <div className="mb-3 flex items-center gap-3">
-            <div className="rounded-xl border border-primary/20 bg-primary/10 p-2">
-              <SparklesIcon className="h-5 w-5 text-primary" />
-            </div>
-            {mbr && <UserAvatar member={mbr} withName={true} side="right" />}
+          <div className="mb-4 flex items-center gap-4">
+            {mbr && <UserAvatar member={mbr} withName={false} side="right" size="lg" />}
             <div>
-              <h1 className="font-bold font-display text-2xl text-foreground sm:text-3xl">내 컬렉션</h1>
+              <h1 className="font-bold font-display text-2xl text-foreground sm:text-3xl">
+                {isMyBookcase ? "내 서재" : `${mbr.nickname}의 서재`}
+              </h1>
             </div>
           </div>
           <p className="ml-12 text-muted-foreground">북마크 컬렉션을 관리하고 새로운 인사이트를 발견하세요.</p>
@@ -54,25 +70,23 @@ export default function BookCaseNickname({ params }: Props) {
 
         {/* Quick Stats */}
         <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-          {/* {[
-            { label: "전체 Book", value: mockBooks.length, icon: Bookmark, color: "text-primary" },
+          {[
+            { label: "전체 Book", value: mbr._count.Book, icon: BookIcon, color: "text-primary" },
             {
               label: "전체 Mark",
-              value: mockBooks.reduce((acc, b) => acc + b.marks.length, 0),
-              icon: Globe,
+              value: mbr._count.Mark,
+              icon: BookMarkedIcon,
               color: "text-accent",
             },
-            { label: "이번 주 추가", value: 12, icon: TrendingUp, color: "text-emerald-400" },
-            { label: "최근 활동", value: "2시간 전", icon: Clock, color: "text-orange-400" },
           ].map((stat, idx) => (
-            <div key={idx} className="glass rounded-xl p-4">
+            <div key={stat.label} className="glass rounded-xl p-4">
               <div className="mb-1 flex items-center gap-2">
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
                 <span className="text-muted-foreground text-xs">{stat.label}</span>
               </div>
               <p className="font-display font-semibold text-foreground text-lg">{stat.value}</p>
             </div>
-          ))} */}
+          ))}
         </div>
 
         {/* Toolbar */}
@@ -130,8 +144,8 @@ export default function BookCaseNickname({ params }: Props) {
         </div>
 
         {/* Kanban Board */}
-        <div className="-mx-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent overflow-x-auto px-4 pb-6">
-          <div className="flex gap-4 lg:gap-6">
+        <div className="-mx-4 overflow-x-auto px-4 pb-4">
+          <div className="flex min-w-max gap-4">
             {books.length ? (
               books.map((book, index) => <Book key={book.id} book={book} index={index} />)
             ) : (

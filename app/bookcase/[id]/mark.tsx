@@ -8,6 +8,7 @@ import {
   MoreHorizontalIcon,
   ThumbsUp,
   ThumbsUpIcon,
+  Trash2Icon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -169,17 +170,17 @@ export default function Mark({
       <div className="mt-3 flex items-center gap-1 border-border/20 border-t pt-3">
         {/* 좋아요 */}
         <IconLabelButton
+          btnType="like"
           icon={<ThumbsUpIcon />}
           onClick={likeMark}
           isActive={iLiked()}
           disabled={isLikePending}
-          variant="actionLike"
         >
           <span>{likes.length}</span>
         </IconLabelButton>
 
         {/* 채팅 */}
-        <IconLabelButton icon={<MessageCircleIcon />} variant="actionComment">
+        <IconLabelButton icon={<MessageCircleIcon />} btnType="comment">
           {mark.Talk.length}
         </IconLabelButton>
 
@@ -190,11 +191,11 @@ export default function Mark({
 
         {/* 신고 */}
         <IconLabelButton
+          btnType="report"
           icon={<HatGlassesIcon />}
           onClick={reportMark}
           isActive={iReported()}
           disabled={isReportPending}
-          variant="actionReport"
         >
           {reports.length}
         </IconLabelButton>
@@ -203,17 +204,17 @@ export default function Mark({
         {hasAuth && (
           <>
             <IconLabelButton
+              btnType="delete"
               onClick={removeMark}
-              icon={<BookmarkXIcon className="size-5" />}
+              icon={<Trash2Icon className="size-5" />}
               tooltip="바로 삭제"
               disabled={isRemovePending}
-              variant="action"
               isDanger
             />
             {/* 수정 */}
             <div className="ml-auto h-7 w-7 opacity-0 hover:text-primary group-hover:opacity-100">
               <MarkDialog mark={mark}>
-                <IconLabelButton icon={<MoreHorizontalIcon />} variant="action" />
+                <IconLabelButton icon={<MoreHorizontalIcon />} />
               </MarkDialog>
             </div>
           </>

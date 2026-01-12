@@ -15,7 +15,7 @@ export default function IconLabel({ icon, size, isActive, isDanger, noti, childr
     className: cn(
       "w-3.5 h-3.5",
       isDanger && "text-destructive",
-      isActive && "fill-primary",
+      isActive && "fill-current",
       { "mr-1": !!noti, "mr-[.3rem]": !!children || children === 0 },
       icon.props?.className,
     ),

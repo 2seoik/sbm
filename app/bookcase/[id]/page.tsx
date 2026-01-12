@@ -69,22 +69,22 @@ export default function BookCaseNickname({ params }: Props) {
         </div>
 
         {/* Quick Stats */}
-        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="mb-6 inline-flex items-center gap-6">
           {[
-            { label: "전체 Book", value: mbr._count.Book, icon: BookIcon, color: "text-primary" },
+            { label: "전체 Book", value: mbr._count.Book, icon: BookMarkedIcon, color: "text-primary" },
             {
               label: "전체 Mark",
               value: mbr._count.Mark,
-              icon: BookMarkedIcon,
+              icon: AlbumIcon,
               color: "text-accent",
             },
           ].map((stat, idx) => (
-            <div key={stat.label} className="glass rounded-xl p-4">
+            <div key={stat.label} className="flex items-center gap-2">
               <div className="mb-1 flex items-center gap-2">
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                <span className="text-muted-foreground text-xs">{stat.label}</span>
+                <span className="text-muted-foreground text-sm">{stat.label}</span>
+                <span className="font-display font-semibold text-foreground">{stat.value}</span>
               </div>
-              <p className="font-display font-semibold text-foreground text-lg">{stat.value}</p>
             </div>
           ))}
         </div>

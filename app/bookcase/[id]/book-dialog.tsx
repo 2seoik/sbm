@@ -40,13 +40,10 @@ export default function BookDialog({
 }>) {
   const router = useRouter();
   const { confirm, alert, prompt } = useAlerter();
-
-  // const [ispublic, setPublic] = useState(false);
-  // const [withdel, setWithdel] = useState(false);
   const [isOpen, setOpen] = useState(false);
   const [options, setOptions] = useState<Record<OptionKey, boolean>>({
-    isPublic: false,
-    burnAfterReading: false,
+    isPublic: book.ispublic,
+    burnAfterReading: book.withdel,
   });
 
   const [validError, save, isPending] = useActionState(async (_prev: ValidError | undefined, formData: FormData) => {
@@ -131,7 +128,7 @@ export default function BookDialog({
             <div className="rounded-xl border border-primary/20 bg-primary/10 p-2">
               <BookMarkedIcon className="h-5 w-5 text-primary" />
             </div>
-            <DialogTitle className="font-display text-xl">Book {!book.id ? "만들기" : "수정하기"}</DialogTitle>
+            <DialogTitle className="font-display text-xl">Book {!book.id ? "만들기" : "편집"}</DialogTitle>
           </div>
           <DialogDescription>설명...</DialogDescription>
         </DialogHeader>
@@ -156,54 +153,6 @@ export default function BookDialog({
                 Public {ispublic && "XX"}
               </Label>
             </div> */}
-          </div>
-          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/50 p-4">
-            <div className="flex items-center gap-3">
-              {options.isPublic ? (
-                <GlobeIcon className="h-5 w-5 text-primary" />
-              ) : (
-                <LockIcon className="h-5 w-5 text-muted-foreground" />
-              )}
-              <div>
-                <p className="font-medium text-sm">{options.isPublic ? "공개" : "비공개"}</p>
-                <p className="text-muted-foreground text-xs">
-                  {options.isPublic ? "모든 사람이 이 Book을 볼 수 있습니다." : "나만 이 Book을 볼 수 있습니다."}
-                </p>
-              </div>
-            </div>
-            <CheckSwitch
-              type="switch"
-              name="ispublic"
-              label="공개 설정"
-              error={validError}
-              checkValue={book.ispublic}
-              setCheckedFunction={(checked) => handleOptionChange("isPublic", checked)}
-            />
-          </div>
-          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/50 p-4">
-            <div className="flex items-center gap-3">
-              {options.burnAfterReading ? (
-                <FlameIcon className="h-5 w-5 text-orange-500" />
-              ) : (
-                <BookOpenIcon className="h-5 w-5 text-muted-foreground" />
-              )}
-              <div>
-                <p className="font-medium text-sm">{options.burnAfterReading ? "1회성 열람" : "영구 보관"}</p>
-                <p className="text-muted-foreground text-xs">
-                  {options.burnAfterReading
-                    ? "열람 후 자동으로 Mark가 삭제됩니다."
-                    : "Mark가 삭제되지 않고 Book에 계속 보관됩니다."}
-                </p>
-              </div>
-            </div>
-            <CheckSwitch
-              name="withdel"
-              label="보관 설정"
-              type="switch"
-              error={validError}
-              checkValue={book.withdel}
-              setCheckedFunction={(checked) => handleOptionChange("burnAfterReading", checked)}
-            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="remark">설명</Label>
@@ -232,6 +181,52 @@ export default function BookDialog({
               </p>
             </div> */}
           </div>
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/50 p-4">
+            <div className="flex items-center gap-3">
+              {options.isPublic ? (
+                <GlobeIcon className="h-5 w-5 text-primary" />
+              ) : (
+                <LockIcon className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div>
+                <p className="font-medium text-sm">{options.isPublic ? "공개" : "비공개"}</p>
+                <p className="text-muted-foreground text-xs">
+                  {options.isPublic ? "모든 사람이 이 Book을 볼 수 있습니다." : "나만 이 Book을 볼 수 있습니다."}
+                </p>
+              </div>
+            </div>
+            <CheckSwitch
+              type="switch"
+              name="ispublic"
+              error={validError}
+              checkValue={book.ispublic}
+              setCheckedFunction={(checked) => handleOptionChange("isPublic", checked)}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/50 p-4">
+            <div className="flex items-center gap-3">
+              {options.burnAfterReading ? (
+                <FlameIcon className="h-5 w-5 text-orange-500" />
+              ) : (
+                <BookOpenIcon className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div>
+                <p className="font-medium text-sm">{options.burnAfterReading ? "열람 후 자동삭제" : "자동삭제 안함"}</p>
+                <p className="text-muted-foreground text-xs">
+                  {options.burnAfterReading
+                    ? "열람 후 자동으로 Mark가 삭제됩니다."
+                    : "Mark가 삭제되지 않고 유지됩니다."}
+                </p>
+              </div>
+            </div>
+            <CheckSwitch
+              name="withdel"
+              type="switch"
+              error={validError}
+              checkValue={book.withdel}
+              setCheckedFunction={(checked) => handleOptionChange("burnAfterReading", checked)}
+            />
+          </div>
 
           <DialogFooter className="mt-5">
             <DialogClose asChild>
@@ -245,7 +240,7 @@ export default function BookDialog({
             )}
 
             <Button type="submit" disabled={isPending}>
-              Book {book.id ? "저장" : "생성"}
+              Book {book.id ? "저장" : "만들기"}
             </Button>
           </DialogFooter>
         </form>

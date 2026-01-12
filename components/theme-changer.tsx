@@ -21,15 +21,13 @@ export default function ThemeChanger() {
   if (!mount || !theme) return <button></button>;
 
   return (
-    <div className="rounded-full border border-neutral-300">
+    <div className="rounded-full border-2 border-border bg-secondary shadow-sm transition-all duration-300 hover:border-primary/50 hover:shadow-md">
       {Object.entries(THEMES_ICONS).map(([themeKey, themeIcon]) => (
         <button
           key={themeKey}
           onClick={() => setTheme(themeKey)}
-          className={`m-1.5 cursor-pointer items-center justify-center gap-2 rounded-full px-1.5 py-1.5 font-medium text-sm transition-colors ${
-            theme === themeKey
-              ? "bg-primary text-primary-foreground"
-              : "hover:bg-foreground/10"
+          className={`m-1.5 cursor-pointer items-center justify-center gap-2 rounded-full px-1 py-1 font-medium text-sm transition-colors ${
+            theme === themeKey ? "bg-primary text-primary-foreground" : "hover:bg-foreground/10"
           }`}
         >
           {themeIcon}

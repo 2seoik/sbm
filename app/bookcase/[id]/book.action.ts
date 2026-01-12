@@ -26,7 +26,7 @@ export const getAllBooksByMember = async (member: number) =>
       });
     },
     [`member-books-${member}`], // ! cache-key
-    { tags: [`member-books-${member}`] } // options
+    { tags: [`member-books-${member}`] }, // options
   )();
 
 export const saveBook = async (formData: FormData) => {
@@ -165,11 +165,7 @@ export const deleteMark = async (id: number, bookOwner?: number) => {
   if (!mark) throw new Error("존재하지 않는 Mark 입니다.");
 
   if (!bookOwner)
-    if (
-      !isadmin &&
-      Number(userId) !== bookOwner &&
-      mark.maker !== Number(userId)
-    )
+    if (!isadmin && Number(userId) !== bookOwner && mark.maker !== Number(userId))
       throw new Error("삭제 권한이 없습니다.");
 
   // if (!mark)
@@ -184,11 +180,7 @@ export const deleteMark = async (id: number, bookOwner?: number) => {
   revalidateTag(`member-books-${bookOwner}`);
 };
 
-export const toggleLikesOrReportMark = async (
-  mark: number,
-  type: "likes" | "reports",
-  bookOwner: number
-) => {
+export const toggleLikesOrReportMark = async (mark: number, type: "likes" | "reports", bookOwner: number) => {
   // error 체크를 위함
   const { id: userId } = await checkLogin();
   const member = Number(userId);
@@ -216,14 +208,10 @@ export const toggleLikesOrReportMark = async (
 
   // select count(*) from likes ....
   //  await (type === "likes" ....
-  const likesCnt = await (isLikes
-    ? prisma.likes.count(where)
-    : prisma.report.count(where));
+  const likesCnt = await (isLikes ? prisma.likes.count(where) : prisma.report.count(where));
 
   if (likesCnt > 0) {
-    type === "likes"
-      ? await prisma.likes.delete(whereMarkMember)
-      : await prisma.report.delete(whereMarkMember);
+    type === "likes" ? await prisma.likes.delete(whereMarkMember) : await prisma.report.delete(whereMarkMember);
   } else {
     type === "likes"
       ? await prisma.likes.create({
@@ -260,10 +248,7 @@ export const toggleFollowBook = async (book: number, bookOwner: number) => {
 export const saveMark = async (formData: FormData) => {
   const { id: userId, isadmin } = await checkLogin();
   const maker = Number(userId);
-  console.log(
-    "🚀 saveMark - formData:",
-    Object.fromEntries(formData.entries())
-  );
+  console.log("🚀 saveMark - formData:", Object.fromEntries(formData.entries()));
 
   const bookId = Number(formData.get("book"));
   const book = await prisma.book.findUnique({

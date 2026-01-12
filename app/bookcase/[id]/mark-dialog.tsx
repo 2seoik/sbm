@@ -1,18 +1,11 @@
 "use client";
 
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { ZapIcon } from "lucide-react";
-import {
-  type MouseEvent,
-  type PropsWithChildren,
-  useActionState,
-  useRef,
-  useState,
-} from "react";
-import ImageUploader, {
-  type ImageUploaderHandler,
-} from "@/components/image-uploader";
+import { PencilIcon, ZapIcon } from "lucide-react";
+import { type MouseEvent, type PropsWithChildren, useActionState, useRef, useState } from "react";
+import ImageUploader, { type ImageUploaderHandler } from "@/components/image-uploader";
 import LabelInput from "@/components/label-input";
+import OgImageUploader from "@/components/og-img-uploader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,14 +16,10 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAlerter } from "@/hooks/contexts/alerter";
 import type { MarkData } from "@/lib/db";
 import type { ValidError } from "@/lib/validator";
@@ -47,12 +36,13 @@ export default function MarkDialog({
     descript: "",
     maker: 0,
   },
+  bookId,
   children,
 }: PropsWithChildren<{
   mark?: MarkData;
+  bookId?: number;
 }>) {
   const { confirm, alert, prompt } = useAlerter();
-
   // const [ispublic, setPublic] = useState(false);
   // const [withdel, setWithdel] = useState(false);
   const [isOpen, setOpen] = useState(false);
@@ -61,23 +51,25 @@ export default function MarkDialog({
   const descRef = useRef<HTMLTextAreaElement>(null);
   const imgUpRef = useRef<ImageUploaderHandler>(null);
 
-  const [validError, save, isPending] = useActionState(
-    async (_prev: ValidError | undefined, formData: FormData) => {
-      formData.set("id", String(mark.id));
-      formData.set("book", String(mark.book));
+  const [validError, save, isPending] = useActionState(async (_prev: ValidError | undefined, formData: FormData) => {
+    const book = mark.id ? mark.book : bookId;
 
-      console.log(">>>>>>", Object.fromEntries(formData.entries()));
-      const err = await saveMark(formData);
-      if (err) {
-        return err;
-      }
+    formData.set("id", String(mark.id));
+    formData.set("book", String(book));
+    const img = imgUpRef.current?.getSrc();
+    if (img) formData.set("image", img);
 
-      setOpen(false);
-      //
-      // router.refresh();
-    },
-    undefined
-  );
+    console.log(">>>>>>", Object.fromEntries(formData.entries()));
+
+    const err = await saveMark(formData);
+    if (err) {
+      return err;
+    }
+
+    setOpen(false);
+    //
+    // router.refresh();
+  }, undefined);
 
   const remove = async () => {
     const ret = await confirm({
@@ -126,14 +118,14 @@ export default function MarkDialog({
 
     if (!titleRef.current || !descRef.current || !imgUpRef.current) return;
 
-    const { ogTitle, ogDescription, ogImage, favicon } = await scrapOg(
-      linkRef.current.value
-    );
+    const { ogTitle, ogDescription, ogImage, favicon } = await scrapOg(linkRef.current.value);
 
     if (ogTitle) titleRef.current.value = ogTitle;
     if (ogDescription) descRef.current.value = ogDescription;
-    if (ogImage?.length || favicon)
+    if (ogImage?.length || favicon) {
+      console.log(">>image url>>", ogImage?.[0]?.url);
       imgUpRef.current.setSrc(ogImage?.[0]?.url || favicon);
+    }
   };
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -146,87 +138,103 @@ export default function MarkDialog({
       <DialogTrigger onClick={click} asChild>
         {children}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>{mark.id ? "Edit" : "Create"} Mark</DialogTitle>
-          <DialogDescription>{mark.link}</DialogDescription>
+          <div className="mb-2 flex items-center gap-3">
+            <div className="rounded-xl border border-accent/20 bg-accent/10 p-2">
+              <PencilIcon className="h-5 w-5 text-accent" />
+            </div>
+            <DialogTitle className="font-display text-xl">Mark {!mark.id ? "추가" : "편집"}</DialogTitle>
+          </div>
+          <DialogDescription>설명...</DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center justify-between">
-            <ImageUploader
-              src={mark.image || `https://avatar.vercel.sh/${mark.title}`}
+        <div className="mt-4 space-y-5">
+          <div className="space-y-2">
+            <OgImageUploader
+              src={mark.image || `https://avatar.vercel.sh/${mark.title}}`}
               alt={mark.title}
               changeImage={changeImage}
               ref={imgUpRef}
             />
           </div>
-
-          <div className="col-span-2 border p-3">
-            <form action={save} ref={formRef}>
-              <div className="mt-5 space-y-5">
+          <form action={save} ref={formRef}>
+            <div className="space-y-5">
+              <div className="space-y-2">
                 <InputGroup>
                   <InputGroupInput
                     ref={linkRef}
+                    id="link"
                     name={"link"}
                     defaultValue={mark.link}
-                    placeholder="Link(URL)..."
+                    placeholder="https://example.com/article"
                   />
-                  <InputGroupAddon align="inline-end">
-                    <InputGroupButton
-                      onClick={scrap}
-                      type="button"
-                      variant="secondary"
-                      className=""
-                    >
-                      <ZapIcon />
-                    </InputGroupButton>
+                  <InputGroupAddon align="block-start">
+                    <Label htmlFor="link" className="text-foreground">
+                      URL
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <InputGroupButton
+                          onClick={scrap}
+                          type="button"
+                          variant="secondary"
+                          className="ml-auto rounded-full"
+                        >
+                          <ZapIcon />
+                        </InputGroupButton>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>OG 정보 가져오기</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </InputGroupAddon>
                 </InputGroup>
-
-                <LabelInput
-                  label="title"
-                  name="title"
-                  ref={titleRef}
-                  error={validError}
-                  defaultValue={mark.title}
-                />
-
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="descript"
-                    className="font-semibold text-sm capitalize"
-                  >
-                    Description
-                  </Label>
-                  <Textarea
-                    placeholder="description..."
-                    id="descript"
-                    name="descript"
-                    ref={descRef}
-                    defaultValue={mark.descript ?? ""}
-                  />
-                </div>
+                <p className="text-muted-foreground text-xs">
+                  버튼을 클릭하면 URL에서 제목과 설명을 자동으로 가져옵니다.
+                </p>
               </div>
-            </form>
-          </div>
-        </div>
+              <LabelInput
+                label="제목"
+                name="title"
+                ref={titleRef}
+                error={validError}
+                defaultValue={mark.title}
+                placeholder="제목을 입력하세요"
+              />
+              <div className="space-y-2">
+                <Label htmlFor="descript" className="font-semibold text-sm capitalize">
+                  설명
+                </Label>
+                <Textarea
+                  placeholder="이 URL에 대한 메모를 남겨보세요."
+                  id="descript"
+                  name="descript"
+                  ref={descRef}
+                  defaultValue={mark.descript ?? ""}
+                  className="resize-none"
+                  rows={2}
+                />
+              </div>
+            </div>
+          </form>
 
-        <DialogFooter className="mt-5">
-          <DialogClose asChild>
-            <Button variant={"outline"}>Cancel</Button>
-          </DialogClose>
+          <DialogFooter className="">
+            <DialogClose asChild>
+              <Button variant={"outline"}>취소</Button>
+            </DialogClose>
 
-          {!!mark.id && (
-            <Button onClick={remove} type="button" variant={"destructive"}>
-              Delete
+            {!!mark.id && (
+              <Button onClick={remove} type="button" variant={"destructive"}>
+                삭제
+              </Button>
+            )}
+
+            <Button onClick={callSave} type="submit" disabled={isPending}>
+              Mark {mark.id ? "저장" : "추가"}
             </Button>
-          )}
-
-          <Button onClick={callSave} type="submit" disabled={isPending}>
-            {mark.id ? "Save" : "Create"} Mark
-          </Button>
-        </DialogFooter>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

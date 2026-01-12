@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import BookDialog from "./book-dialog";
 import FollowButton from "./follow-button";
 import Mark from "./mark";
+import MarkDialog from "./mark-dialog";
 
 type Props =
   | {
@@ -37,6 +38,7 @@ export default function Book({ id, index, book }: Props) {
   if (!data) return <h1 className="font-semibold text-lg text-muted-foreground">Book 을 찾을수 없습니다.</h1>;
 
   const { id: bookId, title, remark, ispublic, withdel, member, Mark: marks, FollowBook: followBooks } = data;
+
   const session = use(auth());
   // 숫자를 감싸는것보다, 문자를감싸는게 유리!
   const isMine = session?.user.id === String(member);
@@ -127,19 +129,20 @@ export default function Book({ id, index, book }: Props) {
               <BookmarkIcon className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="mb-1 text-muted-foreground text-sm">아직 Mark가 없습니다</p>
-            <p className="text-muted-foreground/60 text-xs">첫 번째 Mark를 추가해보세요</p>
           </div>
         )}
       </div>
       {isMine && (
         <div className="rounded-b-2xl border-border/30 border-x border-b bg-card p-3">
-          <Button
-            variant={"glass"}
-            className="group flex w-full items-center justify-center gap-2 rounded-xl border border-border/50 border-dashed py-2.5 text-muted-foreground text-sm transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-          >
-            <PlusIcon className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-            <span>Mark 만들기</span>
-          </Button>
+          <MarkDialog bookId={bookId}>
+            <Button
+              variant={"glass"}
+              className="group flex w-full items-center justify-center gap-2 rounded-xl border border-border/50 border-dashed py-2.5 text-muted-foreground text-sm transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+            >
+              <PlusIcon className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+              <span>Mark 만들기</span>
+            </Button>
+          </MarkDialog>
         </div>
       )}
     </div>
